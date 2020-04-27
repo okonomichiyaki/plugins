@@ -5,6 +5,22 @@ declare const PluginBase: IPluginBase;
 
 let observer: MutationObserver | null = null;
 
+// converts katakana characters in the string to hiragana. will be a no-op if no katakana
+function katakanaToHiragana(s: string) {
+    // not sure why but these unicode characters get garbled after being loaded into LS, so hardcoded the codepoint values
+    const lower = 12448; //"゠".codePointAt(0)!;
+    const upper = 12543; //"ヿ".codePointAt(0)!;
+    const diff = 96;//"ア".codePointAt(0)! - "あ".codePointAt(0)!
+    return s.split("").map(c => {
+        const point = c.codePointAt(0)!;
+        if (point >= lower && point <= upper) {
+            return String.fromCodePoint(point - diff);
+        } else {
+            return c;
+        }
+    }).join("");
+}
+
 function splitAnswers(answers: string) {
     return answers.split(",")
         .map(a => a.trim().toLowerCase())
@@ -29,15 +45,18 @@ function getAnswers() {
             results = results.concat(splitAnswers(answers));
         }
     }
-    console.log("[getAnswers] got " + results.length + " answers");
     return results;
 }
 
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
-    console.log("[matchAnswer] transcript="+transcript);
-    if (answers.includes(transcript.toLowerCase())) {
-        return [0, transcript.length, [transcript]];
+    console.log("[matchAnswer] t="+transcript);
+    for (var i = 0; i < answers.length; i++) {
+        const hiragana = katakanaToHiragana(answers[i]);
+        if (hiragana === transcript.toLowerCase()) {
+            console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript);
+            return [0, transcript.length, [answers[i]]];
+        }
     }
     return undefined;
 }
@@ -47,15 +66,24 @@ function clickNext() {
     if (nextans !== null) {
         nextans.click();
     } else {
-        console.log("[nextItem] nextans was null")
+        console.log("[clickNext] nextans was null")
     }
 }
 
-function inputAnswer(a: string) {
+function inputAnswer(transcript: string) {
+    // assume that we matched a correct answer, so just get one and input it
+    // this makes it work for katakana answers
+    const answers = getAnswers();
+    if (answers.length < 1) {
+        console.log("[inputAnswer] matched transcript but no answers? transcript=%s", transcript);
+        return;
+    }
     const typeans = document.getElementById("typeans");
     if (typeans !== null) {
-        (typeans as HTMLInputElement).value = a;
+        (typeans as HTMLInputElement).value = answers[0];
         clickNext();
+    } else {
+        console.log("[inputAnswer] typeans was null");
     }
 }
 
