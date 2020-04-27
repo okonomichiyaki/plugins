@@ -152,6 +152,7 @@ function exitKitsunContext() {
 
 function enterKitsunContext() {
     console.log("[enterKitsunContext!]");
+    setLanguage();
     PluginBase.util.enterContext(["Kitsun Review"]);
 
     // Options for the observer (which mutations to observe)
