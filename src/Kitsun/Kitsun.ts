@@ -174,6 +174,8 @@ function enterKitsunContext() {
 export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Kitsun",
     description: "",
+// this regex matches the reviews URL but doesn't work for some reason. so match on all kitsun urls
+// match: /^https:\/\/kitsun\.io\/deck\/.*\/reviews$/,
     match: /.*kitsun.*/,
     version: "0.0.1",
     init: enterKitsunContext,
