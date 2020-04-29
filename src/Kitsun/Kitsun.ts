@@ -48,6 +48,9 @@ function getAnswers() {
     return results;
 }
 
+// stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
+var matchedAnswer: string = "";
+
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
     console.log("[matchAnswer] t="+transcript);
@@ -55,9 +58,11 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
         const hiragana = katakanaToHiragana(answers[i]);
         if (hiragana === transcript.toLowerCase()) {
             console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript);
+            matchedAnswer = answers[i];
             return [0, transcript.length, [answers[i]]];
         }
     }
+    matchedAnswer = "";
     return undefined;
 }
 
@@ -71,16 +76,14 @@ function clickNext() {
 }
 
 function inputAnswer(transcript: string) {
-    // assume that we matched a correct answer, so just get one and input it
-    // this makes it work for katakana answers
-    const answers = getAnswers();
-    if (answers.length < 1) {
-        console.log("[inputAnswer] matched transcript but no answers? transcript=%s", transcript);
+    // assumes that we matched a correct answer, so input the stored matched answer:
+    if (matchedAnswer.length < 1) {
+        console.log("[inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
         return;
     }
     const typeans = document.getElementById("typeans");
     if (typeans !== null) {
-        (typeans as HTMLInputElement).value = answers[0];
+        (typeans as HTMLInputElement).value = matchedAnswer;
         clickNext();
     } else {
         console.log("[inputAnswer] typeans was null");
