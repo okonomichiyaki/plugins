@@ -105,7 +105,10 @@ function setJapanese() {
     PluginBase.util.setLanguage("ja");
 }
 
-function findQuest() {
+/**
+ * sets the language in LipSurf for 10K deck
+ */
+function setLanguageFromQuest() {
     const quests = document.getElementsByClassName("quest");
     var found = false;
     for (var i = 0; i < quests.length; i++) {
@@ -120,33 +123,47 @@ function findQuest() {
         }
     }
     if (!found) {
-        console.log("[findQuest] failed to find quest");
+        console.log("[setLanguageFromQuest] failed to find quest");
     }
+    return found;
+}
+
+function setLanguageFromTypeans() {
+    const typeans = document.getElementById("typeans");
+    if (typeans === null) {
+        return false;
+    }
+    // first look for a placeholder in the typeans:
+    const placeholder = typeans.getAttribute("placeholder");
+    if (placeholder === "English" || placeholder === "Meaning") {
+        setEnglish();
+        return true;
+    } else if (placeholder === "Japanese" || placeholder === "Reading") {
+        setJapanese();
+        return true;
+    } else {
+        // then look for a language attribute on typeans:
+        const lang = typeans.getAttribute("lang");
+        if (lang === "ja") {
+            setJapanese();
+            return true;
+        } else if (lang === "en") {
+            setEnglish();
+            return true;
+        }
+    }
+    return false;
 }
 
 function setLanguage() {
-    const typeans = document.getElementById("typeans");
-    if (typeans !== null) {
-        // first look for a placeholder in the typeans:
-        const placeholder = typeans.getAttribute("placeholder");
-        if (placeholder === "English" || placeholder === "Meaning") {
-            setEnglish();
-        } else if (placeholder === "Japanese" || placeholder === "Reading") {
-            setJapanese();
-        } else {
-            // then look for a language attribute on typeans:
-            const lang = typeans.getAttribute("lang");
-            if (lang !== null && lang === "ja") {
-                setJapanese();
-            } else if (lang !== null && lang === "en") {
-                setEnglish();
-            } else {
-                // finally look for the "quest" component of the card:
-                findQuest();
-            }
-        }
-    } else {
-        findQuest();
+    if (!setLanguageFromTypeans() || !setLanguageFromQuest()) {
+        console.log("[setLanguage] failed to set language!");
+    }
+}
+
+function mutationCallback(mutations, observer) {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/reviews$/)) {
+        setLanguage();
     }
 };
 
@@ -159,20 +176,15 @@ function exitKitsunContext() {
 }
 
 function enterKitsunContext() {
-    console.log("[enterKitsunContext!]");
-    setLanguage();
+    console.log("[enterKitsunContext]");
+    mutationCallback(null, null);
     PluginBase.util.enterContext(["Kitsun Review"]);
 
     // Options for the observer (which mutations to observe)
     const config = { attributes: true, childList: true, subtree: true };
 
-    // Callback function to execute when mutations are observed
-    const callback = function(mutationsList, observer) {
-        setLanguage();
-    };
-
     // Create an observer instance linked to the callback function
-    observer = new MutationObserver(callback);
+    observer = new MutationObserver(mutationCallback);
 
     // Start observing the target node for configured mutations
     const mainContainer = document.getElementsByClassName("main-container")[0];
