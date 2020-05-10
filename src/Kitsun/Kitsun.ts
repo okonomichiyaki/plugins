@@ -21,8 +21,13 @@ function katakanaToHiragana(s: string) {
     }).join("");
 }
 
+/**
+ * extracts list of answers from comma separated string
+ * also cleans up individual answers: trim spaces, remove parentheticals
+ */
 function splitAnswers(answers: string) {
-    return answers.split(",")
+    const cleaned = answers.replace(/\(.*\)/,"");
+    return cleaned.split(",")
         .map(a => a.trim().toLowerCase())
         .filter(a => a.length != 0);
 }
