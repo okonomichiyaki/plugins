@@ -156,7 +156,9 @@ function setLanguageFromTypeans() {
 }
 
 function setLanguage() {
-    if (!setLanguageFromTypeans() || !setLanguageFromQuest()) {
+    if (setLanguageFromTypeans() || setLanguageFromQuest()) {
+        console.log("[setLanguage] successfully set language!");
+    } else {
         console.log("[setLanguage] failed to set language!");
     }
 }
