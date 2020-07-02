@@ -1,5 +1,5 @@
 // lipsurf-plugins/src/Kitsun/Kitsun.ts
-/// <reference types="lipsurf-plugin-types"/>
+/// <reference types="lipsurf-types/extension"/>
 
 declare const PluginBase: IPluginBase;
 
