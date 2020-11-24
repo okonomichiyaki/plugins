@@ -56,6 +56,16 @@ function getAnswers() {
 // stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
 var matchedAnswer: string = "";
 
+export function markWrong() {
+    const language = PluginBase.util.getLanguage();
+    const incorrect = language === "en-US" ? "wrong" : "\u3060\u3081";
+    const typeans = document.getElementById("typeans");
+    if (typeans !== null) {
+        (typeans as HTMLInputElement).value = incorrect;
+        clickNext();
+    }
+}
+
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
     console.log("[matchAnswer] t="+transcript);
@@ -198,14 +208,15 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     description: "",
 // this regex matches the reviews URL but doesn't work for some reason. so match on all kitsun urls
     match: /^https:\/\/kitsun\.io\/deck\/.*\/reviews$/,
-    version: "0.0.1",
+    version: "0.0.2",
     init: enterKitsunContext,
     destroy: exitKitsunContext,
     contexts: {
         "Kitsun Review": {
             commands: [
                 "Answer",
-                "Next"
+                "Next",
+                "Wrong"
             ]
         }
     },
@@ -227,6 +238,13 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             context: "Kitsun Review",
             normal: false,
             pageFn: clickNext
+        }, {
+            name: "Wrong",
+            description: "Mark a card wrong",
+            match: "wrong",
+            context: "Kitsun Review",
+            normal: false,
+            pageFn: markWrong
         }
 ]
 }};

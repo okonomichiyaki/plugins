@@ -16,6 +16,10 @@ Kitsun.languages!.ja = {
         "Next": {
             name: "Next (Japanese)",
             match: "\u3064\u304E",
+        },
+        "Wrong": {
+            name: "Wrong (Japanese)",
+            match: "\u3060\u3081"
         }
     }
 };
