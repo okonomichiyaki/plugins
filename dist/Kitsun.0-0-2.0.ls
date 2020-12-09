@@ -49,6 +49,15 @@ function getAnswers() {
 }
 // stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
 var matchedAnswer = "";
+function markWrong() {
+    const language = PluginBase.util.getLanguage();
+    const incorrect = language === "en-US" ? "wrong" : "\u3060\u3081";
+    const typeans = document.getElementById("typeans");
+    if (typeans !== null) {
+        typeans.value = incorrect;
+        clickNext();
+    }
+}
 function matchAnswer(transcript) {
     const answers = getAnswers();
     console.log("[matchAnswer] t=" + transcript);
@@ -156,7 +165,7 @@ function setLanguage() {
     }
 }
 function mutationCallback(mutations, observer) {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/reviews$/)) {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
         setLanguage();
     }
 }
@@ -184,10 +193,11 @@ var Kitsun = { ...PluginBase, ...{
     languages: {},
     description: "",
 
-    // this regex matches the reviews URL but doesn't work for some reason. so match on all kitsun urls
-    match: /^https:\/\/kitsun\.io\/deck\/.*\/reviews$/,
+    // narrower regex that matches only reviews/lessons doesn't work for some reason,
+    // so match on all kitsun urls. mutation observer will ignore all paths but reviews/lessons
+    match: /^https:\/\/kitsun\.io\/.*$/,
 
-    version: "0.0.1",
+    version: "0.0.2",
     init: enterKitsunContext,
     destroy: exitKitsunContext,
 
@@ -195,7 +205,8 @@ var Kitsun = { ...PluginBase, ...{
         "Kitsun Review": {
             commands: [
                 "Answer",
-                "Next"
+                "Next",
+                "Wrong"
             ]
         }
     },
@@ -218,6 +229,13 @@ var Kitsun = { ...PluginBase, ...{
             context: "Kitsun Review",
             normal: false,
             pageFn: clickNext
+        }, {
+            name: "Wrong",
+            description: "Mark a card wrong",
+            match: "wrong",
+            context: "Kitsun Review",
+            normal: false,
+            pageFn: markWrong
         }
     ]
 } };
@@ -237,12 +255,16 @@ Kitsun.languages.ja = {
         "Next": {
             name: "Next (Japanese)",
             match: "\u3064\u304E",
+        },
+        "Wrong": {
+            name: "Wrong (Japanese)",
+            match: "\u3060\u3081"
         }
     }
 };
 
 export default Kitsun;
-export { matchAnswer };LS-SPLITallPlugins.Kitsun = (() => { // lipsurf-plugins/src/Kitsun/Kitsun.ts
+export { markWrong, matchAnswer };LS-SPLITallPlugins.Kitsun = (() => { // lipsurf-plugins/src/Kitsun/Kitsun.ts
 /// <reference types="lipsurf-types/extension"/>
 let observer = null;
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
@@ -293,6 +315,15 @@ function getAnswers() {
 }
 // stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
 var matchedAnswer = "";
+function markWrong() {
+    const language = PluginBase.util.getLanguage();
+    const incorrect = language === "en-US" ? "wrong" : "\u3060\u3081";
+    const typeans = document.getElementById("typeans");
+    if (typeans !== null) {
+        typeans.value = incorrect;
+        clickNext();
+    }
+}
 function matchAnswer(transcript) {
     const answers = getAnswers();
     console.log("[matchAnswer] t=" + transcript);
@@ -400,7 +431,7 @@ function setLanguage() {
     }
 }
 function mutationCallback(mutations, observer) {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/reviews$/)) {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
         setLanguage();
     }
 }
@@ -441,6 +472,11 @@ var Kitsun = { ...PluginBase, ...{
         "Next": {
             normal: false,
             pageFn: clickNext
+        },
+
+        "Wrong": {
+            normal: false,
+            pageFn: markWrong
         }
     }
 } };

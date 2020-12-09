@@ -174,7 +174,7 @@ function setLanguage() {
 }
 
 function mutationCallback(mutations, observer) {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/reviews$/)) {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
         setLanguage();
     }
 };
@@ -206,8 +206,9 @@ function enterKitsunContext() {
 export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Kitsun",
     description: "",
-// this regex matches the reviews URL but doesn't work for some reason. so match on all kitsun urls
-    match: /^https:\/\/kitsun\.io\/deck\/.*\/reviews$/,
+// narrower regex that matches only reviews/lessons doesn't work for some reason,
+// so match on all kitsun urls. mutation observer will ignore all paths but reviews/lessons
+    match: /^https:\/\/kitsun\.io\/.*$/,
     version: "0.0.2",
     init: enterKitsunContext,
     destroy: exitKitsunContext,
