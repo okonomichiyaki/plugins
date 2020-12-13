@@ -6,6 +6,9 @@ declare const PluginBase: IPluginBase;
 // stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
 var matchedAnswer: string = "";
 
+// stores the previous language before we started Bunpro context
+var previousLanguage: LanguageCode = PluginBase.util.getLanguage();
+
 const particles: { [key: string]: string } = {
     "もう":"も",
 }
@@ -87,14 +90,16 @@ function clickHint() {
 
 function enterBunproContext() {
     console.log("[enterBunproContext]");
+    previousLanguage = PluginBase.util.getLanguage();
     PluginBase.util.enterContext(["Bunpro"]);
     PluginBase.util.setLanguage("ja");
 }
 
 function exitBunproContext() {
     console.log("[exitBunproContext]");
-    PluginBase.util.enterContext(["default"]);
-    PluginBase.util.setLanguage("en");
+    PluginBase.util.enterContext(["Normal"]);
+    PluginBase.util.setLanguage(previousLanguage);
+}
 
 function locationChangeHandler() {
     console.log("[locationChangeHandler] href=%s",document.location.href);
