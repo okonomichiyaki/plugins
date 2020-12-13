@@ -95,16 +95,43 @@ function exitBunproContext() {
     console.log("[exitBunproContext]");
     PluginBase.util.enterContext(["default"]);
     PluginBase.util.setLanguage("en");
+
+function locationChangeHandler() {
+    console.log("[locationChangeHandler] href=%s",document.location.href);
+    if (document.location.href.match(/.*www.bunpro.jp\/(learn|study|cram)$/)) {
+        enterBunproContext();
+    } else {
+        exitBunproContext();
+    }
 }
 
 export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Bunpro",
     description: "",
-    // Can't match on the paths because the app dynamically changes the URL?
     match: /.*www.bunpro.jp.*/,
     version: "0.0.1",
-    init: enterBunproContext,
-    destroy: exitBunproContext,
+    init: () => {
+        const src = `history.pushState = ( f => function pushState(){
+            var ret = f.apply(this, arguments);
+            window.dispatchEvent(new Event('locationchange'));
+            return ret;
+        })(history.pushState);
+        history.replaceState = ( f => function replaceState(){
+            var ret = f.apply(this, arguments);
+            window.dispatchEvent(new Event('locationchange'));
+            return ret;
+        })(history.replaceState);`
+        var head = document.getElementsByTagName("head")[0];         
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = src;
+        head.appendChild(script);
+        window.addEventListener('locationchange', locationChangeHandler); 
+    },
+    destroy: () => {
+        window.removeEventListener('locationchange', locationChangeHandler);
+        exitBunproContext();
+    },
     contexts: {
         "Bunpro": {
             commands: [
