@@ -248,7 +248,8 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
         script.type = 'text/javascript';
         script.innerHTML = src;
         head.appendChild(script);
-        window.addEventListener('locationchange', locationChangeHandler); 
+        window.addEventListener('locationchange', locationChangeHandler);
+        locationChangeHandler();
     },
     destroy: () => {
         window.removeEventListener('locationchange', locationChangeHandler);
