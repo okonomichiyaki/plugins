@@ -3,6 +3,12 @@
 
 declare const PluginBase: IPluginBase;
 
+enum FlashCardState {
+    Flipping = 1,
+    Flipped
+}
+
+let currentState: FlashCardState = FlashCardState.Flipping
 let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
 let observer: MutationObserver | null = null;
 
@@ -166,11 +172,13 @@ function setLanguageFromTypeans() {
     return false;
 }
 
-function setLanguage() {
+function setLanguage(): boolean {
     if (setLanguageFromTypeans() || setLanguageFromQuest()) {
         console.log("[setLanguage] successfully set language!");
+        return true;
     } else {
         console.log("[setLanguage] failed to set language!");
+        return false;
     }
 }
 
@@ -178,8 +186,11 @@ function setLanguage() {
  * Watches the page for changes to flip between languages for different cards
  */
 function mutationCallback(mutations, observer) {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
-        setLanguage();
+    if (currentState === FlashCardState.Flipping &&
+        document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        if (setLanguage()) {
+            currentState = FlashCardState.Flipped
+        }
     }
 };
 
@@ -194,7 +205,7 @@ function exitKitsunContext() {
 
 function enterKitsunContext() {
     console.log("[enterKitsunContext]");
-    mutationCallback(null, null);
+    currentState = FlashCardState.Flipping;
     PluginBase.util.enterContext(["Kitsun Review"]);
     previousLanguage = PluginBase.util.getLanguage();
 
@@ -212,7 +223,7 @@ function enterKitsunContext() {
 function locationChangeHandler() {
     if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
         enterKitsunContext();
-    } else {
+    } else if (PluginBase.util.getContext().includes("Kitsun Review")) {
         exitKitsunContext();
     }
 }
@@ -270,7 +281,10 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             match: "next",
             context: "Kitsun Review",
             normal: false,
-            pageFn: clickNext
+            pageFn: () => {
+                currentState = FlashCardState.Flipping;
+                clickNext();
+            }
         }, {
             name: "Wrong",
             description: "Mark a card wrong",
