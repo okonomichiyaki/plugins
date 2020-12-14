@@ -122,9 +122,7 @@ function setJapanese() {
     PluginBase.util.setLanguage("ja");
 }
 
-/**
- * sets the language in LipSurf for 10K deck
- */
+//?
 function setLanguageFromQuest() {
     const quests = document.getElementsByClassName("quest");
     var found = false;
@@ -145,6 +143,7 @@ function setLanguageFromQuest() {
     return found;
 }
 
+// #typeans appears in 10k, basic user deck, prefectures
 function setLanguageFromTypeans() {
     const typeans = document.getElementById("typeans");
     if (typeans === null) {

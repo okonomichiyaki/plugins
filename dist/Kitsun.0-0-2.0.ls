@@ -1,5 +1,12 @@
 import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';// lipsurf-plugins/src/Kitsun/Kitsun.ts
 /// <reference types="lipsurf-types/extension"/>
+var FlashCardState;
+(function (FlashCardState) {
+    FlashCardState[FlashCardState["Flipping"] = 1] = "Flipping";
+    FlashCardState[FlashCardState["Flipped"] = 2] = "Flipped";
+})(FlashCardState || (FlashCardState = {}));
+let currentState = FlashCardState.Flipping;
+let previousLanguage = PluginBase.util.getLanguage();
 let observer = null;
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
 function katakanaToHiragana(s) {
@@ -104,9 +111,7 @@ function setJapanese() {
     console.log("[setLanguage] setting to Japanese");
     PluginBase.util.setLanguage("ja");
 }
-/**
- * sets the language in LipSurf for 10K deck
- */
+//?
 function setLanguageFromQuest() {
     const quests = document.getElementsByClassName("quest");
     var found = false;
@@ -127,6 +132,7 @@ function setLanguageFromQuest() {
     }
     return found;
 }
+// #typeans appears in 10k, basic user deck, prefectures
 function setLanguageFromTypeans() {
     const typeans = document.getElementById("typeans");
     if (typeans === null) {
@@ -159,27 +165,37 @@ function setLanguageFromTypeans() {
 function setLanguage() {
     if (setLanguageFromTypeans() || setLanguageFromQuest()) {
         console.log("[setLanguage] successfully set language!");
+        return true;
     }
     else {
         console.log("[setLanguage] failed to set language!");
+        return false;
     }
 }
+/**
+ * Watches the page for changes to flip between languages for different cards
+ */
 function mutationCallback(mutations, observer) {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
-        setLanguage();
+    if (currentState === FlashCardState.Flipping &&
+        document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        if (setLanguage()) {
+            currentState = FlashCardState.Flipped;
+        }
     }
 }
 function exitKitsunContext() {
     console.log("[exitKitsunContext]");
-    PluginBase.util.enterContext(["default"]);
+    PluginBase.util.enterContext(["Normal"]);
+    PluginBase.util.setLanguage(previousLanguage);
     if (observer !== null) {
         observer.disconnect();
     }
 }
 function enterKitsunContext() {
     console.log("[enterKitsunContext]");
-    mutationCallback();
+    currentState = FlashCardState.Flipping;
     PluginBase.util.enterContext(["Kitsun Review"]);
+    previousLanguage = PluginBase.util.getLanguage();
     // Options for the observer (which mutations to observe)
     const config = { attributes: true, childList: true, subtree: true };
     // Create an observer instance linked to the callback function
@@ -188,18 +204,45 @@ function enterKitsunContext() {
     const mainContainer = document.getElementsByClassName("main-container")[0];
     observer.observe(mainContainer, config);
 }
+function locationChangeHandler() {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        enterKitsunContext();
+    }
+    else if (PluginBase.util.getContext().includes("Kitsun Review")) {
+        exitKitsunContext();
+    }
+}
 var Kitsun = { ...PluginBase, ...{
     niceName: "Kitsun",
     languages: {},
     description: "",
-
-    // narrower regex that matches only reviews/lessons doesn't work for some reason,
-    // so match on all kitsun urls. mutation observer will ignore all paths but reviews/lessons
     match: /^https:\/\/kitsun\.io\/.*$/,
-
     version: "0.0.2",
-    init: enterKitsunContext,
-    destroy: exitKitsunContext,
+
+    init: () => {
+        const src = `history.pushState = ( f => function pushState(){
+        var ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.pushState);
+    history.replaceState = ( f => function replaceState(){
+        var ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.replaceState);`;
+        var head = document.getElementsByTagName("head")[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = src;
+        head.appendChild(script);
+        window.addEventListener('locationchange', locationChangeHandler);
+        locationChangeHandler();
+    },
+
+    destroy: () => {
+        window.removeEventListener('locationchange', locationChangeHandler);
+        exitKitsunContext();
+    },
 
     contexts: {
         "Kitsun Review": {
@@ -228,7 +271,10 @@ var Kitsun = { ...PluginBase, ...{
             match: "next",
             context: "Kitsun Review",
             normal: false,
-            pageFn: clickNext
+            pageFn: () => {
+                currentState = FlashCardState.Flipping;
+                clickNext();
+            }
         }, {
             name: "Wrong",
             description: "Mark a card wrong",
@@ -266,6 +312,13 @@ Kitsun.languages.ja = {
 export default Kitsun;
 export { markWrong, matchAnswer };LS-SPLITallPlugins.Kitsun = (() => { // lipsurf-plugins/src/Kitsun/Kitsun.ts
 /// <reference types="lipsurf-types/extension"/>
+var FlashCardState;
+(function (FlashCardState) {
+    FlashCardState[FlashCardState["Flipping"] = 1] = "Flipping";
+    FlashCardState[FlashCardState["Flipped"] = 2] = "Flipped";
+})(FlashCardState || (FlashCardState = {}));
+let currentState = FlashCardState.Flipping;
+let previousLanguage = PluginBase.util.getLanguage();
 let observer = null;
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
 function katakanaToHiragana(s) {
@@ -370,9 +423,7 @@ function setJapanese() {
     console.log("[setLanguage] setting to Japanese");
     PluginBase.util.setLanguage("ja");
 }
-/**
- * sets the language in LipSurf for 10K deck
- */
+//?
 function setLanguageFromQuest() {
     const quests = document.getElementsByClassName("quest");
     var found = false;
@@ -393,6 +444,7 @@ function setLanguageFromQuest() {
     }
     return found;
 }
+// #typeans appears in 10k, basic user deck, prefectures
 function setLanguageFromTypeans() {
     const typeans = document.getElementById("typeans");
     if (typeans === null) {
@@ -425,27 +477,37 @@ function setLanguageFromTypeans() {
 function setLanguage() {
     if (setLanguageFromTypeans() || setLanguageFromQuest()) {
         console.log("[setLanguage] successfully set language!");
+        return true;
     }
     else {
         console.log("[setLanguage] failed to set language!");
+        return false;
     }
 }
+/**
+ * Watches the page for changes to flip between languages for different cards
+ */
 function mutationCallback(mutations, observer) {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
-        setLanguage();
+    if (currentState === FlashCardState.Flipping &&
+        document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        if (setLanguage()) {
+            currentState = FlashCardState.Flipped;
+        }
     }
 }
 function exitKitsunContext() {
     console.log("[exitKitsunContext]");
-    PluginBase.util.enterContext(["default"]);
+    PluginBase.util.enterContext(["Normal"]);
+    PluginBase.util.setLanguage(previousLanguage);
     if (observer !== null) {
         observer.disconnect();
     }
 }
 function enterKitsunContext() {
     console.log("[enterKitsunContext]");
-    mutationCallback();
+    currentState = FlashCardState.Flipping;
     PluginBase.util.enterContext(["Kitsun Review"]);
+    previousLanguage = PluginBase.util.getLanguage();
     // Options for the observer (which mutations to observe)
     const config = { attributes: true, childList: true, subtree: true };
     // Create an observer instance linked to the callback function
@@ -454,9 +516,39 @@ function enterKitsunContext() {
     const mainContainer = document.getElementsByClassName("main-container")[0];
     observer.observe(mainContainer, config);
 }
+function locationChangeHandler() {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        enterKitsunContext();
+    }
+    else if (PluginBase.util.getContext().includes("Kitsun Review")) {
+        exitKitsunContext();
+    }
+}
 var Kitsun = { ...PluginBase, ...{
-    init: enterKitsunContext,
-    destroy: exitKitsunContext,
+    init: () => {
+        const src = `history.pushState = ( f => function pushState(){
+        var ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.pushState);
+    history.replaceState = ( f => function replaceState(){
+        var ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.replaceState);`;
+        var head = document.getElementsByTagName("head")[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = src;
+        head.appendChild(script);
+        window.addEventListener('locationchange', locationChangeHandler);
+        locationChangeHandler();
+    },
+
+    destroy: () => {
+        window.removeEventListener('locationchange', locationChangeHandler);
+        exitKitsunContext();
+    },
 
     commands: {
         "Answer": {
@@ -471,7 +563,11 @@ var Kitsun = { ...PluginBase, ...{
 
         "Next": {
             normal: false,
-            pageFn: clickNext
+
+            pageFn: () => {
+                currentState = FlashCardState.Flipping;
+                clickNext();
+            }
         },
 
         "Wrong": {
@@ -482,4 +578,153 @@ var Kitsun = { ...PluginBase, ...{
 } };
 
 return Kitsun;
- })()LS-SPLIT
+ })()LS-SPLITallPlugins.Kitsun = (() => { // lipsurf-plugins/src/Kitsun/Kitsun.ts
+/// <reference types="lipsurf-types/extension"/>
+var FlashCardState;
+(function (FlashCardState) {
+    FlashCardState[FlashCardState["Flipping"] = 1] = "Flipping";
+    FlashCardState[FlashCardState["Flipped"] = 2] = "Flipped";
+})(FlashCardState || (FlashCardState = {}));
+let currentState = FlashCardState.Flipping;
+let previousLanguage = PluginBase.util.getLanguage();
+let observer = null;
+function setEnglish() {
+    console.log("[setLanguage] setting to English");
+    PluginBase.util.setLanguage("en");
+}
+function setJapanese() {
+    console.log("[setLanguage] setting to Japanese");
+    PluginBase.util.setLanguage("ja");
+}
+//?
+function setLanguageFromQuest() {
+    const quests = document.getElementsByClassName("quest");
+    var found = false;
+    for (var i = 0; i < quests.length; i++) {
+        const quest = quests[i];
+        const trimmed = quest.innerHTML.trim();
+        if (trimmed === "Vocabulary Meaning") {
+            setEnglish();
+            found = true;
+        }
+        else if (trimmed === "Vocabulary Reading") {
+            setJapanese();
+            found = true;
+        }
+    }
+    if (!found) {
+        console.log("[setLanguageFromQuest] failed to find quest");
+    }
+    return found;
+}
+// #typeans appears in 10k, basic user deck, prefectures
+function setLanguageFromTypeans() {
+    const typeans = document.getElementById("typeans");
+    if (typeans === null) {
+        return false;
+    }
+    // first look for a placeholder in the typeans:
+    const placeholder = typeans.getAttribute("placeholder");
+    if (placeholder === "English" || placeholder === "Meaning") {
+        setEnglish();
+        return true;
+    }
+    else if (placeholder === "Japanese" || placeholder === "Reading") {
+        setJapanese();
+        return true;
+    }
+    else {
+        // then look for a language attribute on typeans:
+        const lang = typeans.getAttribute("lang");
+        if (lang === "ja") {
+            setJapanese();
+            return true;
+        }
+        else if (lang === "en") {
+            setEnglish();
+            return true;
+        }
+    }
+    return false;
+}
+function setLanguage() {
+    if (setLanguageFromTypeans() || setLanguageFromQuest()) {
+        console.log("[setLanguage] successfully set language!");
+        return true;
+    }
+    else {
+        console.log("[setLanguage] failed to set language!");
+        return false;
+    }
+}
+/**
+ * Watches the page for changes to flip between languages for different cards
+ */
+function mutationCallback(mutations, observer) {
+    if (currentState === FlashCardState.Flipping &&
+        document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        if (setLanguage()) {
+            currentState = FlashCardState.Flipped;
+        }
+    }
+}
+function exitKitsunContext() {
+    console.log("[exitKitsunContext]");
+    PluginBase.util.enterContext(["Normal"]);
+    PluginBase.util.setLanguage(previousLanguage);
+    if (observer !== null) {
+        observer.disconnect();
+    }
+}
+function enterKitsunContext() {
+    console.log("[enterKitsunContext]");
+    currentState = FlashCardState.Flipping;
+    PluginBase.util.enterContext(["Kitsun Review"]);
+    previousLanguage = PluginBase.util.getLanguage();
+    // Options for the observer (which mutations to observe)
+    const config = { attributes: true, childList: true, subtree: true };
+    // Create an observer instance linked to the callback function
+    observer = new MutationObserver(mutationCallback);
+    // Start observing the target node for configured mutations
+    const mainContainer = document.getElementsByClassName("main-container")[0];
+    observer.observe(mainContainer, config);
+}
+function locationChangeHandler() {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        enterKitsunContext();
+    }
+    else if (PluginBase.util.getContext().includes("Kitsun Review")) {
+        exitKitsunContext();
+    }
+}
+var Kitsun = { ...PluginBase, ...{
+    init: () => {
+        const src = `history.pushState = ( f => function pushState(){
+        var ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.pushState);
+    history.replaceState = ( f => function replaceState(){
+        var ret = f.apply(this, arguments);
+        window.dispatchEvent(new Event('locationchange'));
+        return ret;
+    })(history.replaceState);`;
+        var head = document.getElementsByTagName("head")[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = src;
+        head.appendChild(script);
+        window.addEventListener('locationchange', locationChangeHandler);
+        locationChangeHandler();
+    },
+
+    destroy: () => {
+        window.removeEventListener('locationchange', locationChangeHandler);
+        exitKitsunContext();
+    },
+
+    commands: {}
+} };
+
+return Kitsun;
+ })()
