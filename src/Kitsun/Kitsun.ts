@@ -3,6 +3,7 @@
 
 declare const PluginBase: IPluginBase;
 
+let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
 let observer: MutationObserver | null = null;
 
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
@@ -173,6 +174,9 @@ function setLanguage() {
     }
 }
 
+/**
+ * Watches the page for changes to flip between languages for different cards
+ */
 function mutationCallback(mutations, observer) {
     if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
         setLanguage();
@@ -181,7 +185,8 @@ function mutationCallback(mutations, observer) {
 
 function exitKitsunContext() {
     console.log("[exitKitsunContext]");
-    PluginBase.util.enterContext(["default"]);
+    PluginBase.util.enterContext(["Normal"]);
+    PluginBase.util.setLanguage(previousLanguage);
     if (observer !== null) {
         observer.disconnect();
     }
@@ -191,6 +196,7 @@ function enterKitsunContext() {
     console.log("[enterKitsunContext]");
     mutationCallback(null, null);
     PluginBase.util.enterContext(["Kitsun Review"]);
+    previousLanguage = PluginBase.util.getLanguage();
 
     // Options for the observer (which mutations to observe)
     const config = { attributes: true, childList: true, subtree: true };
@@ -203,15 +209,41 @@ function enterKitsunContext() {
     observer!.observe(mainContainer, config);
 }
 
+function locationChangeHandler() {
+    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+        enterKitsunContext();
+    } else {
+        exitKitsunContext();
+    }
+}
+
 export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Kitsun",
     description: "",
-// narrower regex that matches only reviews/lessons doesn't work for some reason,
-// so match on all kitsun urls. mutation observer will ignore all paths but reviews/lessons
     match: /^https:\/\/kitsun\.io\/.*$/,
     version: "0.0.2",
-    init: enterKitsunContext,
-    destroy: exitKitsunContext,
+    init: () => {
+        const src = `history.pushState = ( f => function pushState(){
+            var ret = f.apply(this, arguments);
+            window.dispatchEvent(new Event('locationchange'));
+            return ret;
+        })(history.pushState);
+        history.replaceState = ( f => function replaceState(){
+            var ret = f.apply(this, arguments);
+            window.dispatchEvent(new Event('locationchange'));
+            return ret;
+        })(history.replaceState);`
+        var head = document.getElementsByTagName("head")[0];         
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = src;
+        head.appendChild(script);
+        window.addEventListener('locationchange', locationChangeHandler); 
+    },
+    destroy: () => {
+        window.removeEventListener('locationchange', locationChangeHandler);
+        exitKitsunContext();
+    },
     contexts: {
         "Kitsun Review": {
             commands: [
