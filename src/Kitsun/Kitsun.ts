@@ -29,11 +29,12 @@ function katakanaToHiragana(s: string) {
 
 /**
  * extracts list of answers from comma separated string
- * also cleans up individual answers: trim spaces, remove parentheticals
+ * also cleans up individual answers: trim spaces, remove parentheticals, replace punctuation with spaces
  */
 function splitAnswers(answers: string) {
     const cleaned = answers.replace(/\(.*\)/,"");
     return cleaned.split(",")
+        .map(a => a.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," "))
         .map(a => a.trim().toLowerCase())
         .filter(a => a.length != 0);
 }
