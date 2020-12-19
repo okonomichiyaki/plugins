@@ -34,7 +34,7 @@ function katakanaToHiragana(s: string) {
  * extracts list of answers from comma separated string
  * also cleans up individual answers: trim spaces, remove parentheticals, replace punctuation with spaces
  */
-function splitAnswers(answers: string) {
+function transformAnswers(answers: string) {
     const cleaned = answers.replace(/\(.*\)/,"");
     return cleaned.split(",")
         .map(a => a.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," "))
@@ -49,7 +49,7 @@ function getAnswers() {
     if (typeans !== null) {
         const answers = typeans.getAttribute("answer");
         if (answers !== null) {
-            results = results.concat(splitAnswers(answers));
+            results = results.concat(transformAnswers(answers));
         }
     }
     // then try to get answers from combinedans property:
@@ -57,7 +57,7 @@ function getAnswers() {
     if (combinedans !== null) {
         const answers = combinedans.innerHTML;
         if (answers !== null) {
-            results = results.concat(splitAnswers(answers));
+            results = results.concat(transformAnswers(answers));
         }
     }
     return results;
