@@ -82,7 +82,7 @@ const prefectures: { [key: string]: string } = {
     "神奈川":"Kanagawa",
     "高知":"Kochi",
     "熊本":"Kumamoto",
-    "京":"Kyoto",
+    "京都":"Kyoto",
     "三重":"Mie",
     "宮城":"Miyagi",
     "宮崎":"Miyazaki",
