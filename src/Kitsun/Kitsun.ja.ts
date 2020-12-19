@@ -7,18 +7,18 @@ Kitsun.languages!.ja = {
     description: "Kitsun",
     commands: {
         "Answer": {
-            name: "Answer (Japanese)",
+            name: "答え (answer)",
             match: {
-                description: "[Japanese answer]",
+                description: "[Kitsunの答え]",
                 fn: matchAnswer
             }
         },
         "Next": {
-            name: "Next (Japanese)",
+            name: "次へ (next)",
             match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"]
         },
         "Wrong": {
-            name: "Wrong (Japanese)",
+            name: "バツ (wrong)",
             match: ["だめ", "ばつ"],
         }
     }
