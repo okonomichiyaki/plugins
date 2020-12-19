@@ -3,6 +3,8 @@
 
 declare const PluginBase: IPluginBase;
 
+const activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/
+
 enum FlashCardState {
     Flipping = 1,
     Flipped
@@ -185,13 +187,12 @@ function setLanguage(): boolean {
  * Watches the page for changes to flip between languages for different cards
  */
 function mutationCallback(mutations, observer) {
-    if (currentState === FlashCardState.Flipping &&
-        document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+    if (currentState === FlashCardState.Flipping && document.location.href.match(activePages)) {
         if (setLanguage()) {
             currentState = FlashCardState.Flipped
         }
     }
-};
+}
 
 function exitKitsunContext() {
     console.log("[exitKitsunContext]");
@@ -220,7 +221,7 @@ function enterKitsunContext() {
 }
 
 function locationChangeHandler() {
-    if (document.location.href.match(/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons)$/)) {
+    if (document.location.href.match(activePages)) {
         enterKitsunContext();
     } else if (PluginBase.util.getContext().includes("Kitsun Review")) {
         exitKitsunContext();
