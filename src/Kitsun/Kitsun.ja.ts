@@ -15,11 +15,11 @@ Kitsun.languages!.ja = {
         },
         "Next": {
             name: "Next (Japanese)",
-            match: "つぎ",
+            match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"]
         },
         "Wrong": {
             name: "Wrong (Japanese)",
-            match: "だめ",
+            match: ["だめ", "ばつ"],
         }
     }
 };
