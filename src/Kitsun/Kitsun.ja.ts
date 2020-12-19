@@ -15,11 +15,11 @@ Kitsun.languages!.ja = {
         },
         "Next": {
             name: "Next (Japanese)",
-            match: "\u3064\u304E",
+            match: "つぎ",
         },
         "Wrong": {
             name: "Wrong (Japanese)",
-            match: "\u3060\u3081"
+            match: "だめ",
         }
     }
 };

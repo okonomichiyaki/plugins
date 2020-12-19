@@ -14,10 +14,9 @@ let observer: MutationObserver | null = null;
 
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
 function katakanaToHiragana(s: string) {
-    // not sure why but these unicode characters get garbled after being loaded into LS, so hardcoded the codepoint values
-    const lower = 12448; //"゠".codePointAt(0)!;
-    const upper = 12543; //"ヿ".codePointAt(0)!;
-    const diff = 96;//"ア".codePointAt(0)! - "あ".codePointAt(0)!
+    const lower = "゠".codePointAt(0)!;
+    const upper = "ヿ".codePointAt(0)!;
+    const diff = "ア".codePointAt(0)! - "あ".codePointAt(0)!
     return s.split("").map(c => {
         const point = c.codePointAt(0)!;
         if (point >= lower && point <= upper) {
