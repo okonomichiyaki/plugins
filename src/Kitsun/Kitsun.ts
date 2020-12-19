@@ -1,5 +1,6 @@
 // lipsurf-plugins/src/Kitsun/Kitsun.ts
 /// <reference types="lipsurf-types/extension"/>
+import { prefectureToRomaji } from "./prefectures";
 
 declare const PluginBase: IPluginBase;
 
@@ -77,11 +78,16 @@ export function markWrong() {
 
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
+    transcript = transcript.toLowerCase();
     console.log("[matchAnswer] t="+transcript);
     for (var i = 0; i < answers.length; i++) {
-        const hiragana = katakanaToHiragana(answers[i]);
-        if (hiragana === transcript.toLowerCase()) {
-            console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript);
+        const answer = katakanaToHiragana(answers[i]);
+        // special case: current language is Japanese and answer is romaji, then maybe prefectures deck
+        // so convert possible prefecture name to romaji and check that too
+        const prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript)
+        console.log("lang=%s,a=%s,match?=%s,pref=%s", PluginBase.util.getLanguage(), answers[i], answers[i].match(/[a-zA-Z]+/), prefectureToRomaji(transcript))
+        if (answer === transcript || prefectureMatch) {
+            console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript);
             matchedAnswer = answers[i];
             return [0, transcript.length, [answers[i]]];
         }
@@ -92,10 +98,13 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
 
 function clickNext() {
     const nextans = document.getElementById("nextans");
+    const nextButtons = document.querySelectorAll('.kitButton.flip_btn.kitButton__primary')
     if (nextans !== null) {
         nextans.click();
+    } else if (nextButtons.length > 0) {
+        (nextButtons.item(0) as HTMLElement).click();
     } else {
-        console.log("[clickNext] nextans was null")
+        console.log("[clickNext] failed to find next button")
     }
 }
 
@@ -156,7 +165,7 @@ function setLanguageFromTypeans() {
     if (placeholder === "English" || placeholder === "Meaning") {
         setEnglish();
         return true;
-    } else if (placeholder === "Japanese" || placeholder === "Reading") {
+    } else if (placeholder === "Japanese" || placeholder === "Reading" || placeholder === "Enter Prefecture Name ...") {
         setJapanese();
         return true;
     } else {
