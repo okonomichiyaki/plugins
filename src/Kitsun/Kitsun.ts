@@ -64,7 +64,7 @@ var matchedAnswer: string = "";
 
 export function markWrong() {
     const language = PluginBase.util.getLanguage();
-    const incorrect = language === "en-US" ? "wrong" : "\u3060\u3081";
+    const incorrect = language === "en-US" ? "wrong" : "あああ";
     const typeans = document.getElementById("typeans");
     if (typeans !== null) {
         (typeans as HTMLInputElement).value = incorrect;
