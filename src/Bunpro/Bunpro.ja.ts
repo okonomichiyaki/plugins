@@ -7,23 +7,23 @@ Bunpro.languages!.ja = {
     description: "Bunpro",
     commands: {
         "Answer": {
-            name: "Answer (Japanese)",
+            name: "答え (answer)",
             match: {
-                description: "[Japanese answer]",
+                description: "[Bunproの答え]",
                 fn: matchAnswer
             }
         },
         "Hint": {
-            name: "Hint (Japanese)",
-            match: "ひんと",
+            name: "暗示 (hint)",
+            match: ["ひんと", "あんじ"]
         },
         "Next": {
-            name: "Next (Japanese)",
-            match: "つぎ",
+            name: "次へ (next)",
+            match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"]
         },
         "Wrong": {
-            name: "Wrong (Japanese)",
-            match: "だめ",
+            name: "バツ (wrong)",
+            match: ["だめ", "ばつ"]
         }
     }
 };
