@@ -16,7 +16,7 @@ let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
 let observer: MutationObserver | null = null;
 
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
-function katakanaToHiragana(s: string) {
+function katakanaToHiragana(s: string): string {
     const lower = "゠".codePointAt(0)!;
     const upper = "ヿ".codePointAt(0)!;
     const diff = "ア".codePointAt(0)! - "あ".codePointAt(0)!
@@ -30,16 +30,30 @@ function katakanaToHiragana(s: string) {
     }).join("");
 }
 
+function punctuationToSpace(s: string): string {
+    return s.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," ");
+}
+
 /**
- * extracts list of answers from comma separated string
- * also cleans up individual answers: trim spaces, remove parentheticals, replace punctuation with spaces
+ * extracts list of answers from comma separated string,also cleans up individual answers: trim spaces, remove parentheticals
+ * also returns extra copies of answers, replacing any punctuation with spaces
+ * e.g. transcript for "what age?" will not include "?" but for "one's regards" it will include "'" so try both
  */
-function transformAnswers(answers: string) {
-    const cleaned = answers.replace(/\(.*\)/,"");
-    return cleaned.split(",")
-        .map(a => a.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," "))
+function transformAnswers(raw: string): string[] {
+    const results: string[] = []
+    const noParens = raw.replace(/\(.*\)/,"");
+    const answers = noParens.split(",")
         .map(a => a.trim().toLowerCase())
         .filter(a => a.length != 0);
+    for (var i = 0; i < answers.length; i++) {
+        const answer = answers[i];
+        results.push(answer);
+        const noPunct = punctuationToSpace(answer);
+        if (noPunct !== answer) {
+            results.push(answer);
+        }
+    }
+    return results;
 }
 
 function getAnswers() {
