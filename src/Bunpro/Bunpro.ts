@@ -88,6 +88,10 @@ function clickHint() {
     clickElement("#show-english-hint");
 }
 
+function clickShowGrammar() {
+    clickElement("#show-grammar");
+}
+
 function enterBunproContext() {
     console.log("[enterBunproContext]");
     previousLanguage = PluginBase.util.getLanguage();
@@ -144,7 +148,8 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
                 "Answer",
                 "Hint",
                 "Next",
-                "Wrong"
+                "Wrong",
+                "Info"
             ]
         }
     },
@@ -181,6 +186,12 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             match: "wrong",
             normal: false,
             pageFn: markWrong
+        }, {
+            name: "Info",
+            description: "Show grammar info",
+            match: "info",
+            normal: false,
+            pageFn: clickShowGrammar
         }
     ]
 }};

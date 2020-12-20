@@ -24,6 +24,10 @@ Bunpro.languages!.ja = {
         "Wrong": {
             name: "バツ (wrong)",
             match: ["だめ", "ばつ"]
-        }
+        },
+        "Info": {
+            name: "情報 (info)",
+            match: ["じょうほう"]
+        },
     }
 };
