@@ -1,6 +1,6 @@
 // lipsurf-plugins/src/Kitsun/Kitsun.ts
 /// <reference types="lipsurf-types/extension"/>
-import { prefectureToRomaji } from "./prefectures";
+import { prefectureToRomaji, isPrefecturesDeck } from "./prefectures";
 
 declare const PluginBase: IPluginBase;
 
@@ -85,7 +85,6 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
         // special case: current language is Japanese and answer is romaji, then maybe prefectures deck
         // so convert possible prefecture name to romaji and check that too
         const prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript)
-        console.log("lang=%s,a=%s,match?=%s,pref=%s", PluginBase.util.getLanguage(), answers[i], answers[i].match(/[a-zA-Z]+/), prefectureToRomaji(transcript))
         if (answer === transcript || prefectureMatch) {
             console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript);
             matchedAnswer = answers[i];
@@ -123,73 +122,70 @@ function inputAnswer(transcript: string) {
     }
 }
 
-function setEnglish() {
-    console.log("[setLanguage] setting to English");
-    PluginBase.util.setLanguage("en");
-}
 
-function setJapanese() {
-    console.log("[setLanguage] setting to Japanese");
-    PluginBase.util.setLanguage("ja");
-}
-
-//?
-function setLanguageFromQuest() {
+/**
+ * attempts to get the language for 10k listening cards based on .quest element(s)
+ */
+function getLanguageFromQuest(): "en" | "ja" | null {
     const quests = document.getElementsByClassName("quest");
     var found = false;
     for (var i = 0; i < quests.length; i++) {
         const quest = quests[i];
         const trimmed = quest.innerHTML.trim();
         if (trimmed === "Vocabulary Meaning") {
-            setEnglish();
-            found = true;
+            return "en";
         } else if (trimmed === "Vocabulary Reading") {
-            setJapanese();
-            found = true;
+            return "ja";
         }
     }
-    if (!found) {
-        console.log("[setLanguageFromQuest] failed to find quest");
-    }
-    return found;
+    return null;
 }
 
-// #typeans appears in 10k, basic user deck, prefectures
-function setLanguageFromTypeans() {
+/**
+ * attempts to get the language for 10k, basic user deck based on #typeans element
+ */
+function getLanguageFromTypeans(): "en" | "ja" | null {
     const typeans = document.getElementById("typeans");
     if (typeans === null) {
-        return false;
+        return null;
     }
-    // first look for a placeholder in the typeans:
+   // first look for a placeholder in the typeans:
     const placeholder = typeans.getAttribute("placeholder");
     if (placeholder === "English" || placeholder === "Meaning") {
-        setEnglish();
-        return true;
-    } else if (placeholder === "Japanese" || placeholder === "Reading" || placeholder === "Enter Prefecture Name ...") {
-        setJapanese();
-        return true;
+        return "en";
+    } else if (placeholder === "Japanese" || placeholder === "Reading") {
+        return "ja";
     } else {
         // then look for a language attribute on typeans:
         const lang = typeans.getAttribute("lang");
-        if (lang === "ja") {
-            setJapanese();
-            return true;
-        } else if (lang === "en") {
-            setEnglish();
-            return true;
+        if (lang === null || (lang !== "ja" && lang !== "en")) {
+            return null;
         }
+        return lang;
     }
-    return false;
 }
 
 function setLanguage(): boolean {
-    if (setLanguageFromTypeans() || setLanguageFromQuest()) {
-        console.log("[setLanguage] successfully set language!");
+    if (isPrefecturesDeck()) {
+        console.log("[setLanguage] set to Japanese for prefectures deck");
+        PluginBase.util.setLanguage("ja");
         return true;
-    } else {
-        console.log("[setLanguage] failed to set language!");
-        return false;
     }
+    var lang = getLanguageFromTypeans();
+    if (lang !== null) {
+        console.log("[setLanguage] set to %s based on typeans (10k/user deck)", lang);
+        PluginBase.util.setLanguage(lang);
+        return true;
+    }
+    lang = getLanguageFromQuest();
+    if (lang !== null) {
+        console.log("[setLanguage] set to %s based on quest (10k)", lang);
+        PluginBase.util.setLanguage(lang);
+        return true;
+    }
+
+    console.log("[setLanguage] failed to set language!");
+    return false;
 }
 
 /**

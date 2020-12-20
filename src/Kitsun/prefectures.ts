@@ -1,4 +1,19 @@
 
+export function isPrefecturesDeck(): boolean {
+    const typeans = document.getElementById("typeans");
+    if (typeans === null) {
+        return false;
+    }
+    const placeholder = typeans.getAttribute("placeholder");
+    if (placeholder === null) {
+        return false;
+    }
+    if (placeholder === "Enter Prefecture Name ..." || placeholder.match(/Click on the.*Prefecture!/)) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * converts a prefecture name in kanji to romaji
  * todo: support submitting answers with suffix? 県,都,府
@@ -13,6 +28,14 @@ export function prefectureToRomaji(ja: string): string {
 }
 
 const prefectures: { [key: string]: string } = {
+    "とうほく":"Tohoku",
+    "かんさい":"Kansai",
+    "かんとう":"Kanto",
+    "ちゅうぶ":"Chubu",
+    "ちゅうごく":"Chugoku",
+    "しこく":"Shikoku",
+    "きゅうしゅう":"Kyushu",
+
     "あいち":"Aichi",
     "あきた":"Akita",
     "あおもり":"Aomori",
