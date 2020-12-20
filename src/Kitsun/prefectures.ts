@@ -45,7 +45,7 @@ const prefectures: { [key: string]: string } = {
     "ふくおか":"Fukuoka",
     "ふくしま":"Fukushima",
     "ぎふ":"Gifu",
-    "ぐんば":"Gunma",
+    "ぐんま":"Gunma",
     "ひろしま":"Hiroshima",
     "ほっかいどう":"Hokkaido",
     "ひょうご":"Hyogo",
