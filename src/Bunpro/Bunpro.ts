@@ -68,7 +68,7 @@ function clickElement(selector: string) {
     if (element !== null) {
         element.click();
     } else {
-        console.log("[clickNext] %s was null", selector)
+        console.log("[clickElement] %s was null", selector)
     }
 }
 
