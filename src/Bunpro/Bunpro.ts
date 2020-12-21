@@ -145,6 +145,9 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     contexts: {
         "Bunpro": {
             commands: [
+                "Change Language to Japanese",
+                "LipSurf.Normal Mode",
+                "LipSurf.Turn off LipSurf",
                 "Answer",
                 "Hint",
                 "Next",
