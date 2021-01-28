@@ -1,6 +1,7 @@
 // lipsurf-plugins/src/KameSame/KameSame.ts
 /// <reference types="lipsurf-types/extension"/>
 
+import {vocabulary} from './WaniKaniData'
 declare const PluginBase: IPluginBase;
 
 const kamesameDotCom = /^https:\/\/www.kamesame.com\/.*$/
@@ -10,16 +11,13 @@ enum FlashCardState {
     Flipping = 1,
     Flipped
 }
-type JishoWord = { word: string, reading: string };
-let answers: JishoWord[] =[];
 let currentState: FlashCardState = FlashCardState.Flipping
 let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
 let observer: MutationObserver | null = null;
 
-function jishoURL(word: string): string {
-    return encodeURI(`http://localhost:3000/api/v1/search/words?keyword="${word.toLowerCase()}"`); // local proxy to jisho for CORS
-}
-
+/**
+ * get alternative english prompts
+ */
 function getAlternatives(): string[] {
     let alternatives = document.querySelector("#study > div.synonyms > div");
     if (alternatives!==null) {
@@ -30,6 +28,9 @@ function getAlternatives(): string[] {
     return [];
 }
 
+/**
+ * get english prompt words
+ */
 function getWords(): string[] {
     let words = getAlternatives();
     var meaning=document.querySelector("#study > div.meaning > svg > text");
@@ -40,27 +41,6 @@ function getWords(): string[] {
         console.log("[KameSame.getWords] meaning was null")
     }
     return words;
-}
-
-function fetchJisho(word: string) {
-    return fetch(jishoURL(word))
-    .then(response => response.json())
-    .then(json => {
-        let data = json["data"];
-        return (data.flatMap(d => {
-           return d["japanese"];
-        }));
-    });
-}
-
-function fetchAnswers() {
-    let words = getWords();
-    let promises: Promise<any>[] = words.map(fetchJisho);
-    Promise.all(promises).then(results => {
-        answers = [].concat.apply([], results);
-        console.log("[KameSame.fetchJisho] found %d answers for %o", answers.length, words);
-        console.log("[KameSame.fetchJisho] %o", answers);
-    });
 }
 
 // stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
@@ -76,20 +56,22 @@ function clickNext() {
 }
 
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
-    transcript = transcript.toLowerCase();
-    console.log("[KameSame.matchAnswer] t="+transcript);
-    for (var i = 0; i < answers.length; i++) {
-        if (answers[i].reading === transcript) {
-            matchedAnswer = answers[i].word;
-            return [0, transcript.length, [answers[i].reading]];
-        }
+    let words = getWords();
+    let answers=words.reduce((acc: string[], word: string) => { // flat map
+        let readingsMaybe = vocabulary[word];
+        return readingsMaybe === undefined ? acc : acc.concat(readingsMaybe);
+    }, []);
+    console.log("[KameSame.matchAnswer] t=%s,w=%o,a=%o",transcript,words,answers);
+    if (answers.includes(transcript)) {
+        // Because there are many vocabulary (e.g. 文字, 得体) with the same english word, need to save the transcript
+        matchedAnswer = transcript;
+        return [0, transcript.length, [vocabulary[words[0]]]];
     }
     matchedAnswer = "";
     return undefined;
 }
 
 function inputAnswer(transcript: string) {
-    // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
         console.log("[KameSame.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
         return;
@@ -103,12 +85,9 @@ function inputAnswer(transcript: string) {
     }
 }
 
-/**
- * Watches the page for changes to fetch answers for a new card
- */
+// need this any more ?
 function mutationCallback(mutations, observer) {
     if (currentState === FlashCardState.Flipping && document.location.href.match(appReviewsStudy)) {
-        fetchAnswers();
         currentState = FlashCardState.Flipped
     }
 }
