@@ -11,6 +11,7 @@ var previousLanguage: LanguageCode = PluginBase.util.getLanguage();
 
 const particles: { [key: string]: string } = {
     "もう":"も",
+    "わ":"は",
 }
 
 function fuzzyParticle(transcript: string): string {
