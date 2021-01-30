@@ -26,6 +26,8 @@ function fuzzyParticle(transcript: string): string {
 function getAnswers(): string[] {
     return Array.from(document.querySelectorAll('.examples .japanese-example-sentence')).map((sentence) => {
         return Array.from(sentence.childNodes).filter((child) => {
+            // most example sentences will highlight the answer with <strong>,
+            // but some will highlight particles with <span class="chui">
             return (child as Element).tagName === "STRONG" || child instanceof HTMLSpanElement && child.classList.contains("chui");
         }).map((child) => {
             return (child as Element).innerHTML
