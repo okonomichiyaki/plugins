@@ -30,11 +30,11 @@ function getAnswers() {
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     transcript = transcript.toLowerCase();
     const answers = getAnswers();
-    console.log("[matchAnswer] t="+transcript);
+    console.log("[Bunpro.matchAnswer] t=%s,a=%o",transcript, answers);
     for (var i = 0; i < answers.length; i++) {
         const hiragana = answers[i];//katakanaToHiragana(answers[i]);
         if (hiragana === transcript || hiragana === fuzzyParticle(transcript)) {
-            console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript);
+            console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript);
             matchedAnswer = answers[i];
             return [0, transcript.length, [answers[i]]];
         }
@@ -46,7 +46,7 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
 function inputAnswer(transcript: string) {
     // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
-        console.log("[inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
+        console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
         return;
     }
     const studyAreaInput = document.getElementById("study-answer-input");
@@ -54,7 +54,7 @@ function inputAnswer(transcript: string) {
         (studyAreaInput as HTMLInputElement).value = matchedAnswer;
         clickNext();
     } else {
-        console.log("[inputAnswer] studyAreaInput was null");
+        console.log("[Bunpro.inputAnswer] studyAreaInput was null");
     }
 }
 
@@ -68,7 +68,7 @@ function clickElement(selector: string) {
     if (element !== null) {
         element.click();
     } else {
-        console.log("[clickElement] %s was null", selector)
+        console.log("[Bunpro.clickElement] %s was null", selector)
     }
 }
 
@@ -93,20 +93,20 @@ function clickShowGrammar() {
 }
 
 function enterBunproContext() {
-    console.log("[enterBunproContext]");
+    console.log("[Bunpro.enterBunproContext]");
     previousLanguage = PluginBase.util.getLanguage();
     PluginBase.util.enterContext(["Bunpro"]);
     PluginBase.util.setLanguage("ja");
 }
 
 function exitBunproContext() {
-    console.log("[exitBunproContext]");
+    console.log("[Bunpro.exitBunproContext]");
     PluginBase.util.enterContext(["Normal"]);
     PluginBase.util.setLanguage(previousLanguage);
 }
 
 function locationChangeHandler() {
-    console.log("[locationChangeHandler] href=%s",document.location.href);
+    console.log("[Bunpro.locationChangeHandler] href=%s",document.location.href);
     if (document.location.href.match(/.*www.bunpro.jp\/(learn|study|cram)$/)) {
         enterBunproContext();
     } else {
