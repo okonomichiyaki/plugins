@@ -23,9 +23,14 @@ function fuzzyParticle(transcript: string): string {
     }
 }
 
-function getAnswers() {
-    return Array.from(document.querySelectorAll('.examples .japanese-example-sentence strong'))
-        .map((x) => { return x.innerHTML });
+function getAnswers(): string[] {
+    return Array.from(document.querySelectorAll('.examples .japanese-example-sentence')).map((sentence) => {
+        return Array.from(sentence.childNodes).filter((child) => {
+            return (child as Element).tagName === "STRONG" || child instanceof HTMLSpanElement && child.classList.contains("chui");
+        }).map((child) => {
+            return (child as Element).innerHTML
+        }).join('');
+    });
 }
 
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
