@@ -3,6 +3,8 @@
 
 declare const PluginBase: IPluginBase;
 
+const flatMap = (arr, f) => [].concat.apply([], arr.map(f))
+
 // stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
 var matchedAnswer: string = "";
 
@@ -23,16 +25,85 @@ function fuzzyParticle(transcript: string): string {
     }
 }
 
+function getStrongsFromPrompt(): string[] {
+    let strongs = Array.from(document.querySelectorAll("div.study-question-japanese strong"));
+    return strongs.map((strong) => (strong as Element).innerHTML);
+}
+
+function isKanjiWithFurigana(answer: Element): boolean {
+    // are there any <ruby> tags?
+    return Array.from(answer.childNodes).filter((child) => {
+        return (child as Element).tagName === "RUBY"
+    }).length > 0;
+}
+
+function getFurigana(answer: Element): string {
+    return Array.from(answer.querySelectorAll("rt")).map((rt) => rt.innerText).join('');
+}
+
+function isStrong(child: ChildNode): boolean {
+    return (child as Element).tagName === "STRONG";
+}
+
+function isParticle(child: ChildNode): boolean {
+    return child instanceof HTMLSpanElement && child.classList.contains("chui");
+}
+
+function getText(component:ChildNode): string {
+    if (isKanjiWithFurigana(component as Element)) {
+        return getFurigana(component as Element);
+    }
+    return (component as HTMLElement).innerText;
+}
+
+/* extract candidate answers from an example sentence, may include highlighted non-answers */
+function getCandidateAnswers(sentence: Element): string[] {
+    let candidates:string[] =[]
+    let candidate:string | null = null
+    let components =Array.from(sentence.childNodes);
+
+    // step over the components of a sentence, joining together adjacent highlights
+    for (let i = 0; i < components.length; i++) {
+        const component = components[i];
+        if (isStrong(component) || isParticle(component)) {
+            if (candidate === null) {
+                candidate = "";
+            }
+            candidate = candidate + getText(component);
+        } else {
+            if (candidate !== null) {
+                candidates.push(candidate);
+            }
+            candidate=null;
+        }
+    }
+    return candidates;
+}
+
 function getAnswers(): string[] {
-    return Array.from(document.querySelectorAll('.examples .japanese-example-sentence')).map((sentence) => {
-        return Array.from(sentence.childNodes).filter((child) => {
-            // most example sentences will highlight the answer with <strong>,
-            // but some will highlight particles with <span class="chui">
-            return (child as Element).tagName === "STRONG" || child instanceof HTMLSpanElement && child.classList.contains("chui");
-        }).map((child) => {
-            return (child as Element).innerHTML
-        }).join('');
+    let promptStrongs = getStrongsFromPrompt();
+    let sentences = Array.from(document.querySelectorAll('.examples .japanese-example-sentence'));
+    let candidates = flatMap(sentences, getCandidateAnswers);
+    
+    // From the candidates filter out those that appear in the prompt:
+    candidates = candidates.filter(candidate => {
+        return !promptStrongs.includes(candidate);
     });
+
+    let counts: Map<string, number> = new Map();
+    candidates.forEach(candidate => {
+        let value = counts.get(candidate);
+        if (value === undefined) {
+            counts.set(candidate,1);
+        } else {
+            counts.set(candidate,value+1);
+        }
+    });
+    // filtering based on frequency in examples a bit too aggressive (eg のわりに)
+    return Array.from(counts.keys());/*.filter(candidate => {
+        let count=counts.get(candidate)
+        return count!==undefined && count/candidates.length > 0.5;
+    })*/
 }
 
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
