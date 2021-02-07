@@ -4,7 +4,14 @@
 declare const PluginBase: IPluginBase;
 
 const kaniwaniDotCom = /^https:\/\/kaniwani.com\/.*$/;
-const activePages = /^https:\/\/kaniwani.com\/lessons\/session$/;
+const activePages = /^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/;
+
+enum FlashCardState {
+    WaitingForAnswer = 0,
+    CheckedAnswer
+}
+
+let currentState: FlashCardState;
 
 interface KaniWaniAnswer {
     answer: string,
@@ -47,11 +54,13 @@ function getAnswers(): KaniWaniAnswer[] {
 var matchedAnswer: string = "";
 
 export function markWrong() {
+    console.log("[markWrong]");
     const answer = document.getElementById("answer");
     if (answer !== null) {
         (answer as HTMLInputElement).value = "あああ";
         clickNext();
     }
+    currentState = FlashCardState.CheckedAnswer;
     window.setTimeout(() => {
         // expand info card automatically:
         let info = document.querySelectorAll('#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)');
@@ -67,6 +76,11 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
     const answers = getAnswers();
     transcript = transcript.toLowerCase();
     console.log("[matchAnswer] t=%s,a=%o",transcript,answers);
+    if (currentState !== FlashCardState.WaitingForAnswer) {
+        matchedAnswer = "";
+        console.log("[matchAnswer] ignoring");
+        return undefined;
+    }
     for (var i = 0; i < answers.length; i++) {
         const answer = katakanaToHiragana(answers[i].kana);
         if (answer === transcript ){
@@ -80,7 +94,10 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
 }
 
 function clickNext() {
-    const nextButtons = document.querySelectorAll('#app > div > main > div > div > div > section.sc-1y6l0g0-0.dXcQgo > form > div > button > div > span');    
+    let reviewSelector = '#app > div > main > div > div > div > section.sc-1y6l0g0-0.kzMdza > form > div > button > div > span';
+    let lessonSelector = '#app > div > main > div > div > div > section.sc-1y6l0g0-0.dXcQgo > form > div > button > div > span';
+    let selector = document.location.href.includes('reviews') ? reviewSelector : lessonSelector;
+    const nextButtons = document.querySelectorAll(selector);
     if (nextButtons.length > 0) {
         (nextButtons.item(0) as HTMLElement).click();
     } else {
@@ -98,6 +115,7 @@ function inputAnswer(transcript: string) {
     if (answer !== null) {
         (answer as HTMLInputElement).value = matchedAnswer;
         clickNext();
+        currentState = FlashCardState.CheckedAnswer;
     } else {
         console.log("[inputAnswer] answer was null");
     }
@@ -114,6 +132,7 @@ function enterKaniWaniContext() {
     PluginBase.util.enterContext(["KaniWani Review"]);
     previousLanguage = PluginBase.util.getLanguage();
     PluginBase.util.setLanguage('ja');
+    currentState = FlashCardState.WaitingForAnswer;
 }
 
 function locationChangeHandler() {
@@ -178,7 +197,10 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             match: "next",
             context: "KaniWani Review",
             normal: false,
-            pageFn: clickNext
+            pageFn: () => {
+                clickNext();
+                currentState = FlashCardState.WaitingForAnswer;
+            }
         }, {
             name: "Wrong",
             description: "Mark a card wrong",
