@@ -94,11 +94,9 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
 }
 
 function clickNext() {
-    let reviewSelector = '#app > div > main > div > div > div > section.sc-1y6l0g0-0.kzMdza > form > div > button > div > span';
-    let lessonSelector = '#app > div > main > div > div > div > section.sc-1y6l0g0-0.dXcQgo > form > div > button > div > span';
-    let selector = document.location.href.includes('reviews') ? reviewSelector : lessonSelector;
-    const nextButtons = document.querySelectorAll(selector);
-    if (nextButtons.length > 0) {
+    console.log("[KaniWani.clickNext]");
+    const nextButtons = document.querySelectorAll('button[title="Submit answer"]');
+        if (nextButtons.length > 0) {
         (nextButtons.item(0) as HTMLElement).click();
     } else {
         console.log("[KaniWani.clickNext] failed to find next button")
