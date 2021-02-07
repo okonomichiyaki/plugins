@@ -203,7 +203,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Bunpro",
     description: "",
     match: /.*bunpro.jp.*/,
-    version: "0.0.1",
+    version: "0.0.2",
     init: () => {
         const src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
