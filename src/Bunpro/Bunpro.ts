@@ -186,7 +186,7 @@ function exitBunproContext() {
 
 function locationChangeHandler() {
     console.log("[Bunpro.locationChangeHandler] href=%s",document.location.href);
-    if (document.location.href.match(/.*www.bunpro.jp\/(learn|study|cram)$/)) {
+    if (document.location.href.match(/.*bunpro.jp\/(learn|study|cram)$/)) {
         enterBunproContext();
     } else {
         exitBunproContext();
@@ -196,7 +196,7 @@ function locationChangeHandler() {
 export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Bunpro",
     description: "",
-    match: /.*www.bunpro.jp.*/,
+    match: /.*bunpro.jp.*/,
     version: "0.0.1",
     init: () => {
         const src = `history.pushState = ( f => function pushState(){
