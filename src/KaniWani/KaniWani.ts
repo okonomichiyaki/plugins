@@ -29,12 +29,12 @@ function katakanaToHiragana(s: string): string {
 }
 
 function getAnswers(): KaniWaniAnswer[] {
-    let hidden=document.querySelector("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.g04mrt-0.gqVjQO > div > div");
-    if (hidden===null){
+    let hidden=document.querySelectorAll('div[data-ruby]')
+    if (hidden===null || hidden.length===0){
         console.log("[KaniWani.getAnswer] failed to find hidden div");
         return [];
     }
-    let answer = hidden.getAttribute("data-ruby")
+    let answer = hidden[0].getAttribute("data-ruby")
     if (answer===null){
         console.log("[KaniWani.getAnswer] found hidden div, but no data ruby");
         return [];
