@@ -38,7 +38,13 @@ function isKanjiWithFurigana(answer: Element): boolean {
 }
 
 function getFurigana(answer: Element): string {
-    return Array.from(answer.querySelectorAll("rt")).map((rt) => rt.innerText).join('');
+    return Array.from(answer.childNodes).map((child) => {
+        if (child instanceof Text) {
+            return (child as Text).data;
+        } else if ((child as Element).tagName === "RUBY") {
+            return Array.from((child as Element).querySelectorAll("rt")).map((rt) => rt.innerText).join('');
+        }
+    }).join('');
 }
 
 function isStrong(child: ChildNode): boolean {
