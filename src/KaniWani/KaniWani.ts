@@ -38,12 +38,12 @@ function katakanaToHiragana(s: string): string {
 function getAnswers(): KaniWaniAnswer[] {
     let hidden=document.querySelector("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.g04mrt-0.gqVjQO > div > div");
     if (hidden===null){
-        console.log("[getAnswer] failed to find hidden div");
+        console.log("[KaniWani.getAnswer] failed to find hidden div");
         return [];
     }
     let answer = hidden.getAttribute("data-ruby")
     if (answer===null){
-        console.log("[getAnswer] found hidden div, but no data ruby");
+        console.log("[KaniWani.getAnswer] found hidden div, but no data ruby");
         return [];
     }
     let parts = answer.split(' ');
@@ -54,7 +54,7 @@ function getAnswers(): KaniWaniAnswer[] {
 var matchedAnswer: string = "";
 
 export function markWrong() {
-    console.log("[markWrong]");
+    console.log("[KaniWani.markWrong]");
     const answer = document.getElementById("answer");
     if (answer !== null) {
         (answer as HTMLInputElement).value = "あああ";
@@ -75,16 +75,16 @@ export function markWrong() {
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
     transcript = transcript.toLowerCase();
-    console.log("[matchAnswer] t=%s,a=%o",transcript,answers);
+    console.log("[KaniWani.matchAnswer] t=%s,a=%o",transcript,answers);
     if (currentState !== FlashCardState.WaitingForAnswer) {
         matchedAnswer = "";
-        console.log("[matchAnswer] ignoring");
+        console.log("[KaniWani.matchAnswer] ignoring");
         return undefined;
     }
     for (var i = 0; i < answers.length; i++) {
         const answer = katakanaToHiragana(answers[i].kana);
         if (answer === transcript ){
-            console.log("[matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript);
+            console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript);
             matchedAnswer = answers[i].answer;
             return [0, transcript.length, [answers[i].kana]];
         }
@@ -101,14 +101,14 @@ function clickNext() {
     if (nextButtons.length > 0) {
         (nextButtons.item(0) as HTMLElement).click();
     } else {
-        console.log("[clickNext] failed to find next button")
+        console.log("[KaniWani.clickNext] failed to find next button")
     }
 }
 
 function inputAnswer(transcript: string) {
     // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
-        console.log("[inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
+        console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
         return;
     }
     const answer = document.getElementById("answer");
@@ -117,18 +117,18 @@ function inputAnswer(transcript: string) {
         clickNext();
         currentState = FlashCardState.CheckedAnswer;
     } else {
-        console.log("[inputAnswer] answer was null");
+        console.log("[KaniWani.inputAnswer] answer was null");
     }
 }
 
 function exitKaniWaniContext() {
-    console.log("[exitKaniWaniContext]");
+    console.log("[KaniWani.exitKaniWaniContext]");
     PluginBase.util.enterContext(["Normal"]);
     PluginBase.util.setLanguage(previousLanguage);
 }
 
 function enterKaniWaniContext() {
-    console.log("[enterKaniWaniContext]");
+    console.log("[KaniWani.enterKaniWaniContext]");
     PluginBase.util.enterContext(["KaniWani Review"]);
     previousLanguage = PluginBase.util.getLanguage();
     PluginBase.util.setLanguage('ja');
