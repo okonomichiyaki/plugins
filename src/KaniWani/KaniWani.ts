@@ -157,6 +157,9 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     contexts: {
         "KaniWani Review": {
             commands: [
+                "LipSurf.Change Language to Japanese",
+                "LipSurf.Normal Mode",
+                "LipSurf.Turn off LipSurf",
                 "Answer",
                 "Next",
                 "Wrong"
