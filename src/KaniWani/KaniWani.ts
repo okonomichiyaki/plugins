@@ -6,13 +6,6 @@ declare const PluginBase: IPluginBase;
 const kaniwaniDotCom = /^https:\/\/kaniwani.com\/.*$/;
 const activePages = /^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/;
 
-enum FlashCardState {
-    WaitingForAnswer = 0,
-    CheckedAnswer
-}
-
-let currentState: FlashCardState;
-
 interface KaniWaniAnswer {
     answer: string,
     kana: string
@@ -60,7 +53,6 @@ export function markWrong() {
         (answer as HTMLInputElement).value = "あああ";
         clickNext();
     }
-    currentState = FlashCardState.CheckedAnswer;
     window.setTimeout(() => {
         // expand info card automatically:
         let info = document.querySelectorAll('#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)');
@@ -76,11 +68,6 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
     const answers = getAnswers();
     transcript = transcript.toLowerCase();
     console.log("[KaniWani.matchAnswer] t=%s,a=%o",transcript,answers);
-    if (currentState !== FlashCardState.WaitingForAnswer) {
-        matchedAnswer = "";
-        console.log("[KaniWani.matchAnswer] ignoring");
-        return undefined;
-    }
     for (var i = 0; i < answers.length; i++) {
         const answer = katakanaToHiragana(answers[i].kana);
         if (answer === transcript ){
@@ -113,7 +100,6 @@ function inputAnswer(transcript: string) {
     if (answer !== null) {
         (answer as HTMLInputElement).value = matchedAnswer;
         clickNext();
-        currentState = FlashCardState.CheckedAnswer;
     } else {
         console.log("[KaniWani.inputAnswer] answer was null");
     }
@@ -130,7 +116,6 @@ function enterKaniWaniContext() {
     PluginBase.util.enterContext(["KaniWani Review"]);
     previousLanguage = PluginBase.util.getLanguage();
     PluginBase.util.setLanguage('ja');
-    currentState = FlashCardState.WaitingForAnswer;
 }
 
 function locationChangeHandler() {
@@ -195,10 +180,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             match: "next",
             context: "KaniWani Review",
             normal: false,
-            pageFn: () => {
-                clickNext();
-                currentState = FlashCardState.WaitingForAnswer;
-            }
+            pageFn: clickNext
         }, {
             name: "Wrong",
             description: "Mark a card wrong",
