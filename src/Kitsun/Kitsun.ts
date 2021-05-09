@@ -41,7 +41,8 @@ function punctuationToSpace(s: string): string {
  */
 function transformAnswers(raw: string): string[] {
     const results: string[] = []
-    const noParens = raw.replace(/\(.*\)/,"");
+    const noZeroWith = raw.replace(/[\u200B-\u200D\uFEFF]/g, '');
+    const noParens = noZeroWith.replace(/\(.*\)/,"");
     const answers = noParens.split(",")
         .map(a => a.trim().toLowerCase())
         .filter(a => a.length != 0);
@@ -93,14 +94,14 @@ export function markWrong() {
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
     transcript = transcript.toLowerCase();
-    console.log("[matchAnswer] t="+transcript);
+    console.log("[Kitsun.matchAnswer] t=%s, a=%o",transcript,answers);
     for (var i = 0; i < answers.length; i++) {
         const answer = katakanaToHiragana(answers[i]);
         // special case: current language is Japanese and answer is romaji, then maybe prefectures deck
         // so convert possible prefecture name to romaji and check that too
         const prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript)
         if (answer === transcript || prefectureMatch) {
-            console.log("[matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript);
+            console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript);
             matchedAnswer = answers[i];
             return [0, transcript.length, [answers[i]]];
         }
@@ -117,14 +118,14 @@ function clickNext() {
     } else if (nextButtons.length > 0) {
         (nextButtons.item(0) as HTMLElement).click();
     } else {
-        console.log("[clickNext] failed to find next button")
+        console.log("[Kitsun.clickNext] failed to find next button")
     }
 }
 
 function inputAnswer(transcript: string) {
     // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
-        console.log("[inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
+        console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
         return;
     }
     const typeans = document.getElementById("typeans");
@@ -132,7 +133,7 @@ function inputAnswer(transcript: string) {
         (typeans as HTMLInputElement).value = matchedAnswer;
         clickNext();
     } else {
-        console.log("[inputAnswer] typeans was null");
+        console.log("[Kitsun.inputAnswer] typeans was null");
     }
 }
 
@@ -181,24 +182,24 @@ function getLanguageFromTypeans(): "en" | "ja" | null {
 
 function setLanguage(): boolean {
     if (isPrefecturesDeck()) {
-        console.log("[setLanguage] set to Japanese for prefectures deck");
+        console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck");
         PluginBase.util.setLanguage("ja");
         return true;
     }
     var lang = getLanguageFromTypeans();
     if (lang !== null) {
-        console.log("[setLanguage] set to %s based on typeans (10k/user deck)", lang);
+        console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)", lang);
         PluginBase.util.setLanguage(lang);
         return true;
     }
     lang = getLanguageFromQuest();
     if (lang !== null) {
-        console.log("[setLanguage] set to %s based on quest (10k)", lang);
+        console.log("[Kitsun.setLanguage] set to %s based on quest (10k)", lang);
         PluginBase.util.setLanguage(lang);
         return true;
     }
 
-    console.log("[setLanguage] failed to set language!");
+    console.log("[Kitsun.setLanguage] failed to set language!");
     return false;
 }
 
@@ -214,7 +215,7 @@ function mutationCallback(mutations, observer) {
 }
 
 function exitKitsunContext() {
-    console.log("[exitKitsunContext]");
+    console.log("[Kitsun.exitKitsunContext]");
     PluginBase.util.enterContext(["Normal"]);
     PluginBase.util.setLanguage(previousLanguage);
     if (observer !== null) {
@@ -223,7 +224,7 @@ function exitKitsunContext() {
 }
 
 function enterKitsunContext() {
-    console.log("[enterKitsunContext]");
+    console.log("[Kitsun.enterKitsunContext]");
     currentState = FlashCardState.Flipping;
     PluginBase.util.enterContext(["Kitsun Review"]);
     previousLanguage = PluginBase.util.getLanguage();
