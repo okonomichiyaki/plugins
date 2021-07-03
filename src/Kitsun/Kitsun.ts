@@ -91,6 +91,17 @@ export function markWrong() {
     }
 }
 
+function compareAnswer(answer: string, transcript: string) {
+    if (answer===transcript) {
+        return true;
+    }
+    // check if the transcript is just the answer multiple times because the user's trying to get the engine to recognize
+    if (transcript.replace(new RegExp(answer,"g"), "").length===0) {
+        return true;
+    }
+    return false;
+}
+
 export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
     transcript = transcript.toLowerCase();
@@ -100,7 +111,7 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
         // special case: current language is Japanese and answer is romaji, then maybe prefectures deck
         // so convert possible prefecture name to romaji and check that too
         const prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript)
-        if (answer === transcript || prefectureMatch) {
+        if (compareAnswer(answer, transcript) || prefectureMatch) {
             console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript);
             matchedAnswer = answers[i];
             return [0, transcript.length, [answers[i]]];
@@ -111,6 +122,11 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
 }
 
 function clickNext() {
+    const quizButtons=document.querySelectorAll('body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled');
+    if (quizButtons.length > 0) {
+        (quizButtons.item(0) as HTMLElement).click();
+        return;
+    }
     const nextans = document.getElementById("nextans");
     const nextButtons = document.querySelectorAll('.kitButton.flip_btn.kitButton__primary')
     if (nextans !== null) {
@@ -207,6 +223,7 @@ function setLanguage(): boolean {
  * Watches the page for changes to flip between languages for different cards
  */
 function mutationCallback(mutations, observer) {
+    console.log("[Kitsun.mutationCallback] " + FlashCardState[currentState]);
     if (currentState === FlashCardState.Flipping && document.location.href.match(activePages)) {
         if (setLanguage()) {
             currentState = FlashCardState.Flipped
@@ -238,6 +255,9 @@ function enterKitsunContext() {
     // Start observing the target node for configured mutations
     const mainContainer = document.getElementsByClassName("main-container")[0];
     observer!.observe(mainContainer, config);
+    
+    // Trigger callback to check the language initially
+    mutationCallback(null, null);
 }
 
 function locationChangeHandler() {
