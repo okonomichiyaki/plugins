@@ -4,16 +4,14 @@ import { prefectureToRomaji, isPrefecturesDeck } from "./prefectures";
 
 declare const PluginBase: IPluginBase;
 
-const activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/
+let activePages: RegExp;
+let FlashCardState: { Flipping: string, Flipped: string };
+let currentState: string;
+let previousLanguage: LanguageCode;
+let observer: MutationObserver | null;
 
-const FlashCardState = {
-    "Flipping":"Flipping",
-    "Flipped":"Flipped"
-}
-
-let currentState = FlashCardState.Flipping;
-let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
-let observer: MutationObserver | null = null;
+// stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
+var matchedAnswer: string;
 
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
 function katakanaToHiragana(s: string): string {
@@ -77,9 +75,6 @@ function getAnswers() {
     }
     return results;
 }
-
-// stores the actual answer we matched so it can be inputted by pageFn (inputAnswer)
-var matchedAnswer: string = "";
 
 export function markWrong() {
     const language = PluginBase.util.getLanguage();
@@ -234,7 +229,9 @@ function mutationCallback(mutations, observer) {
 function exitKitsunContext() {
     console.log("[Kitsun.exitKitsunContext]");
     PluginBase.util.enterContext(["Normal"]);
-    PluginBase.util.setLanguage(previousLanguage);
+    if (previousLanguage !== null) {
+        PluginBase.util.setLanguage(previousLanguage);
+    }
     if (observer !== null) {
         observer.disconnect();
     }
@@ -275,6 +272,13 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     apiVersion: 2,
     version: "0.0.4",
     init: () => {
+        activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/;
+        FlashCardState = {
+            "Flipping":"Flipping",
+            "Flipped":"Flipped"
+        };
+        currentState = FlashCardState.Flipping;
+        previousLanguage = PluginBase.util.getLanguage();
         const src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
