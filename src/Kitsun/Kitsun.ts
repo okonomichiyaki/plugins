@@ -6,12 +6,12 @@ declare const PluginBase: IPluginBase;
 
 const activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/
 
-enum FlashCardState {
-    Flipping = 1,
-    Flipped
+const FlashCardState = {
+    "Flipping":"Flipping",
+    "Flipped":"Flipped"
 }
 
-let currentState: FlashCardState = FlashCardState.Flipping
+let currentState = FlashCardState.Flipping;
 let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
 let observer: MutationObserver | null = null;
 
