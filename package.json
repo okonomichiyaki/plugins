@@ -38,6 +38,7 @@
     "lipsurf-cli": "https://github.com/lipsurf/cli",
     "lipsurf-types": "https://github.com/lipsurf/types",
     "rimraf": "^3.0.2",
+    "typescript": "^4.3.5",
     "vuepress": "^1.6.0"
   }
 }
