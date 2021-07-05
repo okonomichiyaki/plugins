@@ -102,9 +102,9 @@ function compareAnswer(answer: string, transcript: string) {
     return false;
 }
 
-export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
+export function matchAnswer({preTs, normTs}: TsData): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
-    transcript = transcript.toLowerCase();
+    let transcript = normTs.toLowerCase();
     console.log("[Kitsun.matchAnswer] t=%s, a=%o",transcript,answers);
     for (var i = 0; i < answers.length; i++) {
         const answer = katakanaToHiragana(answers[i]);
@@ -138,10 +138,10 @@ function clickNext() {
     }
 }
 
-function inputAnswer(transcript: string) {
+function inputAnswer({preTs, normTs}: TsData) {
     // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
-        console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
+        console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, normTs);
         return;
     }
     const typeans = document.getElementById("typeans");
