@@ -272,7 +272,8 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Kitsun",
     description: "",
     match: /^https:\/\/kitsun\.io\/.*$/,
-    version: "0.0.3",
+    apiVersion: 2,
+    version: "0.0.4",
     init: () => {
         const src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
