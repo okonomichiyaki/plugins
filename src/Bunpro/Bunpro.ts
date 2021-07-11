@@ -9,6 +9,8 @@ var matchedAnswer: string = "";
 // stores the previous language before we started Bunpro context
 var previousLanguage: LanguageCode;
 
+const BUNPRO_HREF_REGX = /^https?:\/\/(www\.)?bunpro\.jp\/(learn|study|cram)/;
+
 const particles: { [key: string]: string } = {
     "もう":"も",
     "わ":"は",
@@ -116,7 +118,7 @@ function exitBunproContext() {
 
 function locationChangeHandler() {
     console.log("[Bunpro.locationChangeHandler] href=%s",document.location.href);
-    if (document.location.href.match(/.*bunpro.jp\/(learn|study|cram)$/)) {
+    if (document.location.href.match(BUNPRO_HREF_REGX)) {
         enterBunproContext();
     } else {
         exitBunproContext();
@@ -174,11 +176,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             description: "Submit an answer for a Bunpro review",
             match: {
                 description: "[answer]",
-                fn: (transcript) => {
-                    if (document.location.href.match(/.*www.bunpro.jp\/(learn|study|cram)$/)) {
-                        return matchAnswer(transcript);
-                    }
-                }
+                fn: matchAnswer
             },
             normal: false,
             pageFn: inputAnswer

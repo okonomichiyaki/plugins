@@ -70,10 +70,7 @@ var Bunpro_default = { ...PluginBase, languages: {}, niceName: "Bunpro", descrip
   script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
 }, destroy: () => {
   window.removeEventListener("locationchange", locationChangeHandler), exitBunproContext();
-}, contexts: { Bunpro: { commands: ["LipSurf.Change Language to Japanese", "LipSurf.Normal Mode", "LipSurf.Turn off LipSurf", "Answer", "Hint", "Next", "Wrong", "Info"] } }, commands: [{ name: "Answer", description: "Submit an answer for a Bunpro review", match: { description: "[answer]", fn: (transcript) => {
-  if (document.location.href.match(/.*www.bunpro.jp\/(learn|study|cram)$/))
-    return matchAnswer(transcript);
-} }, normal: !1, pageFn: inputAnswer }, { name: "Hint", description: "Toggle the translated hint", match: "hint", normal: !1, pageFn: clickHint }, { name: "Next", description: "Go to the next card", match: "next", normal: !1, pageFn: clickNext }, { name: "Wrong", description: "Mark a card wrong", match: "wrong", normal: !1, pageFn: markWrong }, { name: "Info", description: "Show grammar info", match: "info", normal: !1, pageFn: clickShowGrammar }] };
+}, contexts: { Bunpro: { commands: ["LipSurf.Change Language to Japanese", "LipSurf.Normal Mode", "LipSurf.Turn off LipSurf", "Answer", "Hint", "Next", "Wrong", "Info"] } }, commands: [{ name: "Answer", description: "Submit an answer for a Bunpro review", match: { description: "[answer]", fn: matchAnswer }, normal: !1, pageFn: inputAnswer }, { name: "Hint", description: "Toggle the translated hint", match: "hint", normal: !1, pageFn: clickHint }, { name: "Next", description: "Go to the next card", match: "next", normal: !1, pageFn: clickNext }, { name: "Wrong", description: "Mark a card wrong", match: "wrong", normal: !1, pageFn: markWrong }, { name: "Info", description: "Show grammar info", match: "info", normal: !1, pageFn: clickShowGrammar }] };
 Bunpro_default.languages.ja = { niceName: "Bunpro", description: "Bunpro", commands: { Answer: { name: "答え (answer)", match: { description: "[Bunproの答え]", fn: matchAnswer } }, Hint: { name: "暗示 (hint)", match: ["ひんと", "あんじ"] }, Next: { name: "次へ (next)", match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"] }, Wrong: { name: "バツ (wrong)", match: ["だめ", "ばつ"] }, Info: { name: "情報 (info)", match: ["じょうほう"] } } };
 var dumby_default = Bunpro_default;
 export {
@@ -152,9 +149,15 @@ allPlugins.Bunpro = (() => {
     script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
   }, destroy: () => {
     window.removeEventListener("locationchange", locationChangeHandler), exitBunproContext();
-  }, commands: { Answer: { match: { en: (transcript) => {
-    if (document.location.href.match(/.*www.bunpro.jp\/(learn|study|cram)$/))
-      return matchAnswer(transcript);
+  }, commands: { Answer: { match: { en: function({ preTs, normTs }) {
+    let transcript = normTs.toLowerCase(), answers = getAnswers();
+    console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
+    for (var i = 0; i < answers.length; i++) {
+      let hiragana = answers[i];
+      if (hiragana === transcript || hiragana === fuzzyParticle(transcript))
+        return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
+    }
+    matchedAnswer = "";
   }, ja: function({ preTs, normTs }) {
     let transcript = normTs.toLowerCase(), answers = getAnswers();
     console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
