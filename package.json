@@ -36,7 +36,7 @@
     "@types/chrome": "0.0.66",
     "cross-env": "^7.0.2",
     "lipsurf-cli": "https://github.com/lipsurf/cli",
-    "lipsurf-types": "https://github.com/lipsurf/types#9835b989ab60b2a9bd83cd493facfef6d6a5b46e",
+    "lipsurf-types": "https://github.com/lipsurf/types",
     "rimraf": "^3.0.2",
     "typescript": "^4.3.5",
     "vuepress": "^1.6.0"
