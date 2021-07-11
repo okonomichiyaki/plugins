@@ -1,0 +1,6 @@
+rm -rf node_modules/
+yarn cache clean
+yarn
+yarn add --dev https://github.com/lipsurf/types
+yarn add --dev https://github.com/lipsurf/cli
+yarn add --dev typescript
