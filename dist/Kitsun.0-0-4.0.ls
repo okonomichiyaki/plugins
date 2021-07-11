@@ -1,4 +1,132 @@
-import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';function A(){let u=document.getElementById("typeans");if(u===null)return!1;let e=u.getAttribute("placeholder");return e===null?!1:!!(e==="Enter Prefecture Name ..."||e.match(/Click on the.*Prefecture!/))}function E(u){let e=k[u];return e==null?u:e.toLowerCase()}var k={とうほく:"Tohoku",かんさい:"Kansai",かんとう:"Kanto",ちゅうぶ:"Chubu",ちゅうごく:"Chugoku",しこく:"Shikoku",きゅうしゅう:"Kyushu",あいち:"Aichi",あきた:"Akita",あおもり:"Aomori",ちば:"Chiba",えひめ:"Ehime",ふくい:"Fukui",ふくおか:"Fukuoka",ふくしま:"Fukushima",ぎふ:"Gifu",ぐんま:"Gunma",ひろしま:"Hiroshima",ほっかいどう:"Hokkaido",ひょうご:"Hyogo",いばらき:"Ibaraki",いしかわ:"Ishikawa",いわて:"Iwate",かがわ:"Kagawa",かごしま:"Kagoshima",かながわ:"Kanagawa",こうち:"Kochi",くまもと:"Kumamoto",きょうと:"Kyoto",みえ:"Mie",みやぎ:"Miyagi",みやざき:"Miyazaki",ながの:"Nagano",ながさき:"Nagasaki",なら:"Nara",にいがた:"Niigata",おおいた:"Oita",おかやま:"Okayama",おきなわ:"Okinawa",おおさか:"Osaka",さが:"Saga",さいたま:"Saitama",しが:"Shiga",しまね:"Shimane",しずおか:"Shizuoka",とちぎ:"Tochigi",とくしま:"Tokushima",とうきょう:"Tokyo",とっとり:"Tottori",とやま:"Toyama",わかやま:"Wakayama",やまがた:"Yamagata",やまぐち:"Yamaguchi",やまなし:"Yamanashi",愛知:"Aichi",秋田:"Akita",青森:"Aomori",千葉:"Chiba",愛媛:"Ehime",福井:"Fukui",福岡:"Fukuoka",福島:"Fukushima",岐阜:"Gifu",群馬:"Gunma",広島:"Hiroshima",北海道:"Hokkaido",兵庫:"Hyogo",茨城:"Ibaraki",石川:"Ishikawa",岩手:"Iwate",香川:"Kagawa",鹿児島:"Kagoshima",神奈川:"Kanagawa",高知:"Kochi",熊本:"Kumamoto",京都:"Kyoto",三重:"Mie",宮城:"Miyagi",宮崎:"Miyazaki",長野:"Nagano",長崎:"Nagasaki",奈良:"Nara",新潟:"Niigata",大分:"Oita",岡山:"Okayama",沖縄:"Okinawa",大阪:"Osaka",佐賀:"Saga",埼玉:"Saitama",滋賀:"Shiga",島根:"Shimane",静岡:"Shizuoka",栃木:"Tochigi",徳島:"Tokushima",東京:"Tokyo",鳥取:"Tottori",富山:"Toyama",和歌山:"Wakayama",山形:"Yamagata",山口:"Yamaguchi",山梨:"Yamanashi"},f=/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/,s={Flipping:"Flipping",Flipped:"Flipped"},r=s.Flipping,p=PluginBase.util.getLanguage(),c=null;function y(u){let e="゠".codePointAt(0),t="ヿ".codePointAt(0),a="ア".codePointAt(0)-"あ".codePointAt(0);return u.split("").map(n=>{let i=n.codePointAt(0);return i>=e&&i<=t?String.fromCodePoint(i-a):n}).join("")}function B(u){return u.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," ")}function h(u){let e=[],n=u.replace(/[\u200B-\u200D\uFEFF]/g,"").replace(/\(.*\)/,"").split(",").map(o=>o.trim().toLowerCase()).filter(o=>o.length!=0);for(var i=0;i<n.length;i++){let o=n[i];e.push(o),B(o)!==o&&e.push(o)}return e}function v(){var u=[];let e=document.getElementById("typeans");if(e!==null){let a=e.getAttribute("answer");a!==null&&(u=u.concat(h(a)))}let t=document.getElementById("combinedans");if(t!==null){let a=t.innerHTML;a!==null&&(u=u.concat(h(a)))}return u}var l="";function K(){let e=PluginBase.util.getLanguage()==="en-US"?"wrong":"あああ",t=document.getElementById("typeans");t!==null&&(t.value=e,g())}function b(u,e){return u===e||e.replace(new RegExp(u,"g"),"").length===0}function d({preTs:u,normTs:e}){let t=v(),a=e.toLowerCase();console.log("[Kitsun.matchAnswer] t=%s, a=%o",a,t);for(var n=0;n<t.length;n++){let i=y(t[n]),o=PluginBase.util.getLanguage()==="ja"&&t[n].match(/[a-zA-Z]+/)&&i===E(a);if(b(i,a)||o)return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s",t[n],i,a),l=t[n],[0,a.length,[t[n]]]}l=""}function g(){let u=document.querySelectorAll("body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled");if(u.length>0){u.item(0).click();return}let e=document.getElementById("nextans"),t=document.querySelectorAll(".kitButton.flip_btn.kitButton__primary");e!==null?e.click():t.length>0?t.item(0).click():console.log("[Kitsun.clickNext] failed to find next button")}function D({preTs:u,normTs:e}){if(l.length<1){console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",l,e);return}let t=document.getElementById("typeans");t!==null?(t.value=l,g()):console.log("[Kitsun.inputAnswer] typeans was null")}function L(){let u=document.getElementsByClassName("quest");for(var e=!1,t=0;t<u.length;t++){let n=u[t].innerHTML.trim();if(n==="Vocabulary Meaning")return"en";if(n==="Vocabulary Reading")return"ja"}return null}function x(){let u=document.getElementById("typeans");if(u===null)return null;let e=u.getAttribute("placeholder");if(e==="English"||e==="Meaning")return"en";if(e==="Japanese"||e==="Reading")return"ja";{let t=u.getAttribute("lang");return t===null||t!=="ja"&&t!=="en"?null:t}}function S(){if(A())return console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck"),PluginBase.util.setLanguage("ja"),!0;var u=x();return u!==null?(console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)",u),PluginBase.util.setLanguage(u),!0):(u=L(),u!==null?(console.log("[Kitsun.setLanguage] set to %s based on quest (10k)",u),PluginBase.util.setLanguage(u),!0):(console.log("[Kitsun.setLanguage] failed to set language!"),!1))}function w(u,e){console.log("[Kitsun.mutationCallback] "+s[r]),r===s.Flipping&&document.location.href.match(f)&&S()&&(r=s.Flipped)}function C(){console.log("[Kitsun.exitKitsunContext]"),PluginBase.util.enterContext(["Normal"]),PluginBase.util.setLanguage(p),c!==null&&c.disconnect()}function P(){console.log("[Kitsun.enterKitsunContext]"),r=s.Flipping,PluginBase.util.enterContext(["Kitsun Review"]),p=PluginBase.util.getLanguage();let u={attributes:!0,childList:!0,subtree:!0};c=new MutationObserver(w);let e=document.getElementsByClassName("main-container")[0];c.observe(e,u),w(null,null)}function m(){document.location.href.match(f)?P():PluginBase.util.getContext().includes("Kitsun Review")&&C()}var F={...PluginBase,languages:{},niceName:"Kitsun",description:"",match:/^https:\/\/kitsun\.io\/.*$/,apiVersion:2,version:"0.0.4",init:()=>{let u=`history.pushState = ( f => function pushState(){
+import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';// dist/tmp/Kitsun/Kitsun.js
+function isPrefecturesDeck() {
+  let typeans = document.getElementById("typeans");
+  if (typeans === null)
+    return !1;
+  let placeholder = typeans.getAttribute("placeholder");
+  return placeholder === null ? !1 : !!(placeholder === "Enter Prefecture Name ..." || placeholder.match(/Click on the.*Prefecture!/));
+}
+function prefectureToRomaji(ja) {
+  let maybe = prefectures[ja];
+  return maybe == null ? ja : maybe.toLowerCase();
+}
+var prefectures = { とうほく: "Tohoku", かんさい: "Kansai", かんとう: "Kanto", ちゅうぶ: "Chubu", ちゅうごく: "Chugoku", しこく: "Shikoku", きゅうしゅう: "Kyushu", あいち: "Aichi", あきた: "Akita", あおもり: "Aomori", ちば: "Chiba", えひめ: "Ehime", ふくい: "Fukui", ふくおか: "Fukuoka", ふくしま: "Fukushima", ぎふ: "Gifu", ぐんま: "Gunma", ひろしま: "Hiroshima", ほっかいどう: "Hokkaido", ひょうご: "Hyogo", いばらき: "Ibaraki", いしかわ: "Ishikawa", いわて: "Iwate", かがわ: "Kagawa", かごしま: "Kagoshima", かながわ: "Kanagawa", こうち: "Kochi", くまもと: "Kumamoto", きょうと: "Kyoto", みえ: "Mie", みやぎ: "Miyagi", みやざき: "Miyazaki", ながの: "Nagano", ながさき: "Nagasaki", なら: "Nara", にいがた: "Niigata", おおいた: "Oita", おかやま: "Okayama", おきなわ: "Okinawa", おおさか: "Osaka", さが: "Saga", さいたま: "Saitama", しが: "Shiga", しまね: "Shimane", しずおか: "Shizuoka", とちぎ: "Tochigi", とくしま: "Tokushima", とうきょう: "Tokyo", とっとり: "Tottori", とやま: "Toyama", わかやま: "Wakayama", やまがた: "Yamagata", やまぐち: "Yamaguchi", やまなし: "Yamanashi", 愛知: "Aichi", 秋田: "Akita", 青森: "Aomori", 千葉: "Chiba", 愛媛: "Ehime", 福井: "Fukui", 福岡: "Fukuoka", 福島: "Fukushima", 岐阜: "Gifu", 群馬: "Gunma", 広島: "Hiroshima", 北海道: "Hokkaido", 兵庫: "Hyogo", 茨城: "Ibaraki", 石川: "Ishikawa", 岩手: "Iwate", 香川: "Kagawa", 鹿児島: "Kagoshima", 神奈川: "Kanagawa", 高知: "Kochi", 熊本: "Kumamoto", 京都: "Kyoto", 三重: "Mie", 宮城: "Miyagi", 宮崎: "Miyazaki", 長野: "Nagano", 長崎: "Nagasaki", 奈良: "Nara", 新潟: "Niigata", 大分: "Oita", 岡山: "Okayama", 沖縄: "Okinawa", 大阪: "Osaka", 佐賀: "Saga", 埼玉: "Saitama", 滋賀: "Shiga", 島根: "Shimane", 静岡: "Shizuoka", 栃木: "Tochigi", 徳島: "Tokushima", 東京: "Tokyo", 鳥取: "Tottori", 富山: "Toyama", 和歌山: "Wakayama", 山形: "Yamagata", 山口: "Yamaguchi", 山梨: "Yamanashi" }, activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/, FlashCardState = { Flipping: "Flipping", Flipped: "Flipped" }, currentState, previousLanguage, observer, matchedAnswer;
+function katakanaToHiragana(s) {
+  let lower = "゠".codePointAt(0), upper = "ヿ".codePointAt(0), diff = "ア".codePointAt(0) - "あ".codePointAt(0);
+  return s.split("").map((c) => {
+    let point = c.codePointAt(0);
+    return point >= lower && point <= upper ? String.fromCodePoint(point - diff) : c;
+  }).join("");
+}
+function punctuationToSpace(s) {
+  return s.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/, " ");
+}
+function transformAnswers(raw) {
+  let results = [], answers = raw.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\(.*\)/, "").split(",").map((a) => a.trim().toLowerCase()).filter((a) => a.length != 0);
+  for (var i = 0; i < answers.length; i++) {
+    let answer = answers[i];
+    results.push(answer), punctuationToSpace(answer) !== answer && results.push(answer);
+  }
+  return results;
+}
+function getAnswers() {
+  var results = [];
+  let typeans = document.getElementById("typeans");
+  if (typeans !== null) {
+    let answers = typeans.getAttribute("answer");
+    answers !== null && (results = results.concat(transformAnswers(answers)));
+  }
+  let combinedans = document.getElementById("combinedans");
+  if (combinedans !== null) {
+    let answers = combinedans.innerHTML;
+    answers !== null && (results = results.concat(transformAnswers(answers)));
+  }
+  return results;
+}
+function markWrong() {
+  let incorrect = PluginBase.util.getLanguage() === "en-US" ? "wrong" : "あああ", typeans = document.getElementById("typeans");
+  typeans !== null && (typeans.value = incorrect, clickNext());
+}
+function compareAnswer(answer, transcript) {
+  return answer === transcript || transcript.replace(new RegExp(answer, "g"), "").length === 0;
+}
+function matchAnswer({ preTs, normTs }) {
+  let answers = getAnswers(), transcript = normTs.toLowerCase();
+  console.log("[Kitsun.matchAnswer] t=%s, a=%o", transcript, answers);
+  for (var i = 0; i < answers.length; i++) {
+    let answer = katakanaToHiragana(answers[i]), prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript);
+    if (compareAnswer(answer, transcript) || prefectureMatch)
+      return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
+  }
+  matchedAnswer = "";
+}
+function clickNext() {
+  let quizButtons = document.querySelectorAll("body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled");
+  if (quizButtons.length > 0) {
+    quizButtons.item(0).click();
+    return;
+  }
+  let nextans = document.getElementById("nextans"), nextButtons = document.querySelectorAll(".kitButton.flip_btn.kitButton__primary");
+  nextans !== null ? nextans.click() : nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[Kitsun.clickNext] failed to find next button");
+}
+function inputAnswer({ preTs, normTs }) {
+  if (matchedAnswer.length < 1) {
+    console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, normTs);
+    return;
+  }
+  let typeans = document.getElementById("typeans");
+  typeans !== null ? (typeans.value = matchedAnswer, clickNext()) : console.log("[Kitsun.inputAnswer] typeans was null");
+}
+function getLanguageFromQuest() {
+  let quests = document.getElementsByClassName("quest");
+  for (var found = !1, i = 0; i < quests.length; i++) {
+    let trimmed = quests[i].innerHTML.trim();
+    if (trimmed === "Vocabulary Meaning")
+      return "en";
+    if (trimmed === "Vocabulary Reading")
+      return "ja";
+  }
+  return null;
+}
+function getLanguageFromTypeans() {
+  let typeans = document.getElementById("typeans");
+  if (typeans === null)
+    return null;
+  let placeholder = typeans.getAttribute("placeholder");
+  if (placeholder === "English" || placeholder === "Meaning")
+    return "en";
+  if (placeholder === "Japanese" || placeholder === "Reading")
+    return "ja";
+  {
+    let lang = typeans.getAttribute("lang");
+    return lang === null || lang !== "ja" && lang !== "en" ? null : lang;
+  }
+}
+function setLanguage() {
+  if (isPrefecturesDeck())
+    return console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck"), PluginBase.util.setLanguage("ja"), !0;
+  var lang = getLanguageFromTypeans();
+  return lang !== null ? (console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)", lang), PluginBase.util.setLanguage(lang), !0) : (lang = getLanguageFromQuest(), lang !== null ? (console.log("[Kitsun.setLanguage] set to %s based on quest (10k)", lang), PluginBase.util.setLanguage(lang), !0) : (console.log("[Kitsun.setLanguage] failed to set language!"), !1));
+}
+function mutationCallback(mutations, observer2) {
+  console.log("[Kitsun.mutationCallback] " + FlashCardState[currentState]), currentState === FlashCardState.Flipping && document.location.href.match(activePages) && setLanguage() && (currentState = FlashCardState.Flipped);
+}
+function exitKitsunContext() {
+  console.log("[Kitsun.exitKitsunContext]"), PluginBase.util.enterContext(["Normal"]), previousLanguage !== null && PluginBase.util.setLanguage(previousLanguage), observer !== null && observer.disconnect();
+}
+function enterKitsunContext() {
+  console.log("[Kitsun.enterKitsunContext]"), currentState = FlashCardState.Flipping, PluginBase.util.enterContext(["Kitsun Review"]), previousLanguage = PluginBase.util.getLanguage();
+  let config = { attributes: !0, childList: !0, subtree: !0 };
+  observer = new MutationObserver(mutationCallback);
+  let mainContainer = document.getElementsByClassName("main-container")[0];
+  observer.observe(mainContainer, config), mutationCallback(null, null);
+}
+function locationChangeHandler() {
+  document.location.href.match(activePages) ? enterKitsunContext() : PluginBase.util.getContext().includes("Kitsun Review") && exitKitsunContext();
+}
+var Kitsun_default = { ...PluginBase, languages: {}, niceName: "Kitsun", description: "", match: /^https:\/\/kitsun\.io\/.*$/, apiVersion: 2, version: "0.0.4", init: () => {
+  currentState = FlashCardState.Flipping, previousLanguage = PluginBase.util.getLanguage();
+  let src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -7,8 +135,149 @@ import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;var e=document.getElementsByTagName("head")[0],t=document.createElement("script");t.type="text/javascript",t.innerHTML=u,e.appendChild(t),window.addEventListener("locationchange",m),m()},destroy:()=>{window.removeEventListener("locationchange",m),C()},contexts:{"Kitsun Review":{commands:["Change Language to Japanese","LipSurf.Normal Mode","LipSurf.Turn off LipSurf","Answer","Next","Wrong"]}},commands:[{name:"Answer",description:"Submit an English answer for a Kitsun review",match:{description:"[English answer]",fn:d},context:"Kitsun Review",normal:!1,pageFn:D},{name:"Next",description:"Go to the next item in a Kitsun review",match:"next",context:"Kitsun Review",normal:!1,pageFn:()=>{r=s.Flipping,g()}},{name:"Wrong",description:"Mark a card wrong",match:"wrong",context:"Kitsun Review",normal:!1,pageFn:K}]};F.languages.ja={niceName:"Kitsun",description:"Kitsun",commands:{Answer:{name:"答え (answer)",match:{description:"[Kitsunの答え]",fn:d}},Next:{name:"次へ (next)",match:["つぎ","ねくすと","ていしゅつ","すすむ","ちぇっく"]},Wrong:{name:"バツ (wrong)",match:["だめ","ばつ"]}}};var N=F;export{N as default};
-LS-SPLITallPlugins.Kitsun=(()=>{function k(){let u=document.getElementById("typeans");if(u===null)return!1;let e=u.getAttribute("placeholder");return e===null?!1:!!(e==="Enter Prefecture Name ..."||e.match(/Click on the.*Prefecture!/))}function h(u){let e=B[u];return e==null?u:e.toLowerCase()}var B={とうほく:"Tohoku",かんさい:"Kansai",かんとう:"Kanto",ちゅうぶ:"Chubu",ちゅうごく:"Chugoku",しこく:"Shikoku",きゅうしゅう:"Kyushu",あいち:"Aichi",あきた:"Akita",あおもり:"Aomori",ちば:"Chiba",えひめ:"Ehime",ふくい:"Fukui",ふくおか:"Fukuoka",ふくしま:"Fukushima",ぎふ:"Gifu",ぐんま:"Gunma",ひろしま:"Hiroshima",ほっかいどう:"Hokkaido",ひょうご:"Hyogo",いばらき:"Ibaraki",いしかわ:"Ishikawa",いわて:"Iwate",かがわ:"Kagawa",かごしま:"Kagoshima",かながわ:"Kanagawa",こうち:"Kochi",くまもと:"Kumamoto",きょうと:"Kyoto",みえ:"Mie",みやぎ:"Miyagi",みやざき:"Miyazaki",ながの:"Nagano",ながさき:"Nagasaki",なら:"Nara",にいがた:"Niigata",おおいた:"Oita",おかやま:"Okayama",おきなわ:"Okinawa",おおさか:"Osaka",さが:"Saga",さいたま:"Saitama",しが:"Shiga",しまね:"Shimane",しずおか:"Shizuoka",とちぎ:"Tochigi",とくしま:"Tokushima",とうきょう:"Tokyo",とっとり:"Tottori",とやま:"Toyama",わかやま:"Wakayama",やまがた:"Yamagata",やまぐち:"Yamaguchi",やまなし:"Yamanashi",愛知:"Aichi",秋田:"Akita",青森:"Aomori",千葉:"Chiba",愛媛:"Ehime",福井:"Fukui",福岡:"Fukuoka",福島:"Fukushima",岐阜:"Gifu",群馬:"Gunma",広島:"Hiroshima",北海道:"Hokkaido",兵庫:"Hyogo",茨城:"Ibaraki",石川:"Ishikawa",岩手:"Iwate",香川:"Kagawa",鹿児島:"Kagoshima",神奈川:"Kanagawa",高知:"Kochi",熊本:"Kumamoto",京都:"Kyoto",三重:"Mie",宮城:"Miyagi",宮崎:"Miyazaki",長野:"Nagano",長崎:"Nagasaki",奈良:"Nara",新潟:"Niigata",大分:"Oita",岡山:"Okayama",沖縄:"Okinawa",大阪:"Osaka",佐賀:"Saga",埼玉:"Saitama",滋賀:"Shiga",島根:"Shimane",静岡:"Shizuoka",栃木:"Tochigi",徳島:"Tokushima",東京:"Tokyo",鳥取:"Tottori",富山:"Toyama",和歌山:"Wakayama",山形:"Yamagata",山口:"Yamaguchi",山梨:"Yamanashi"},w=/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/,r={Flipping:"Flipping",Flipped:"Flipped"},l=r.Flipping,C=PluginBase.util.getLanguage(),g=null;function p(u){let e="゠".codePointAt(0),t="ヿ".codePointAt(0),n="ア".codePointAt(0)-"あ".codePointAt(0);return u.split("").map(a=>{let s=a.codePointAt(0);return s>=e&&s<=t?String.fromCodePoint(s-n):a}).join("")}function v(u){return u.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," ")}function F(u){let e=[],a=u.replace(/[\u200B-\u200D\uFEFF]/g,"").replace(/\(.*\)/,"").split(",").map(o=>o.trim().toLowerCase()).filter(o=>o.length!=0);for(var s=0;s<a.length;s++){let o=a[s];e.push(o),v(o)!==o&&e.push(o)}return e}function f(){var u=[];let e=document.getElementById("typeans");if(e!==null){let n=e.getAttribute("answer");n!==null&&(u=u.concat(F(n)))}let t=document.getElementById("combinedans");if(t!==null){let n=t.innerHTML;n!==null&&(u=u.concat(F(n)))}return u}var i="";function D(){let e=PluginBase.util.getLanguage()==="en-US"?"wrong":"あああ",t=document.getElementById("typeans");t!==null&&(t.value=e,c())}function d(u,e){return u===e||e.replace(new RegExp(u,"g"),"").length===0}function S({preTs:u,normTs:e}){let t=f(),n=e.toLowerCase();console.log("[Kitsun.matchAnswer] t=%s, a=%o",n,t);for(var a=0;a<t.length;a++){let s=p(t[a]),o=PluginBase.util.getLanguage()==="ja"&&t[a].match(/[a-zA-Z]+/)&&s===h(n);if(d(s,n)||o)return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s",t[a],s,n),i=t[a],[0,n.length,[t[a]]]}i=""}function c(){let u=document.querySelectorAll("body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled");if(u.length>0){u.item(0).click();return}let e=document.getElementById("nextans"),t=document.querySelectorAll(".kitButton.flip_btn.kitButton__primary");e!==null?e.click():t.length>0?t.item(0).click():console.log("[Kitsun.clickNext] failed to find next button")}function T({preTs:u,normTs:e}){if(i.length<1){console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",i,e);return}let t=document.getElementById("typeans");t!==null?(t.value=i,c()):console.log("[Kitsun.inputAnswer] typeans was null")}function K(){let u=document.getElementsByClassName("quest");for(var e=!1,t=0;t<u.length;t++){let a=u[t].innerHTML.trim();if(a==="Vocabulary Meaning")return"en";if(a==="Vocabulary Reading")return"ja"}return null}function b(){let u=document.getElementById("typeans");if(u===null)return null;let e=u.getAttribute("placeholder");if(e==="English"||e==="Meaning")return"en";if(e==="Japanese"||e==="Reading")return"ja";{let t=u.getAttribute("lang");return t===null||t!=="ja"&&t!=="en"?null:t}}function L(){if(k())return console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck"),PluginBase.util.setLanguage("ja"),!0;var u=b();return u!==null?(console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)",u),PluginBase.util.setLanguage(u),!0):(u=K(),u!==null?(console.log("[Kitsun.setLanguage] set to %s based on quest (10k)",u),PluginBase.util.setLanguage(u),!0):(console.log("[Kitsun.setLanguage] failed to set language!"),!1))}function E(u,e){console.log("[Kitsun.mutationCallback] "+r[l]),l===r.Flipping&&document.location.href.match(w)&&L()&&(l=r.Flipped)}function y(){console.log("[Kitsun.exitKitsunContext]"),PluginBase.util.enterContext(["Normal"]),PluginBase.util.setLanguage(C),g!==null&&g.disconnect()}function P(){console.log("[Kitsun.enterKitsunContext]"),l=r.Flipping,PluginBase.util.enterContext(["Kitsun Review"]),C=PluginBase.util.getLanguage();let u={attributes:!0,childList:!0,subtree:!0};g=new MutationObserver(E);let e=document.getElementsByClassName("main-container")[0];g.observe(e,u),E(null,null)}function A(){document.location.href.match(w)?P():PluginBase.util.getContext().includes("Kitsun Review")&&y()}return{...PluginBase,init:()=>{let u=`history.pushState = ( f => function pushState(){
+        })(history.replaceState);`;
+  var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
+  script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
+}, destroy: () => {
+  window.removeEventListener("locationchange", locationChangeHandler), exitKitsunContext();
+}, contexts: { "Kitsun Review": { commands: ["Change Language to Japanese", "LipSurf.Normal Mode", "LipSurf.Turn off LipSurf", "Answer", "Next", "Wrong"] } }, commands: [{ name: "Answer", description: "Submit an English answer for a Kitsun review", match: { description: "[English answer]", fn: matchAnswer }, context: "Kitsun Review", normal: !1, pageFn: inputAnswer }, { name: "Next", description: "Go to the next item in a Kitsun review", match: "next", context: "Kitsun Review", normal: !1, pageFn: () => {
+  currentState = FlashCardState.Flipping, clickNext();
+} }, { name: "Wrong", description: "Mark a card wrong", match: "wrong", context: "Kitsun Review", normal: !1, pageFn: markWrong }] };
+Kitsun_default.languages.ja = { niceName: "Kitsun", description: "Kitsun", commands: { Answer: { name: "答え (answer)", match: { description: "[Kitsunの答え]", fn: matchAnswer } }, Next: { name: "次へ (next)", match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"] }, Wrong: { name: "バツ (wrong)", match: ["だめ", "ばつ"] } } };
+var dumby_default = Kitsun_default;
+export {
+  dumby_default as default
+};
+LS-SPLIT// dist/tmp/Kitsun/Kitsun.js
+allPlugins.Kitsun = (() => {
+  function isPrefecturesDeck() {
+    let typeans = document.getElementById("typeans");
+    if (typeans === null)
+      return !1;
+    let placeholder = typeans.getAttribute("placeholder");
+    return placeholder === null ? !1 : !!(placeholder === "Enter Prefecture Name ..." || placeholder.match(/Click on the.*Prefecture!/));
+  }
+  function prefectureToRomaji(ja) {
+    let maybe = prefectures[ja];
+    return maybe == null ? ja : maybe.toLowerCase();
+  }
+  var prefectures = { とうほく: "Tohoku", かんさい: "Kansai", かんとう: "Kanto", ちゅうぶ: "Chubu", ちゅうごく: "Chugoku", しこく: "Shikoku", きゅうしゅう: "Kyushu", あいち: "Aichi", あきた: "Akita", あおもり: "Aomori", ちば: "Chiba", えひめ: "Ehime", ふくい: "Fukui", ふくおか: "Fukuoka", ふくしま: "Fukushima", ぎふ: "Gifu", ぐんま: "Gunma", ひろしま: "Hiroshima", ほっかいどう: "Hokkaido", ひょうご: "Hyogo", いばらき: "Ibaraki", いしかわ: "Ishikawa", いわて: "Iwate", かがわ: "Kagawa", かごしま: "Kagoshima", かながわ: "Kanagawa", こうち: "Kochi", くまもと: "Kumamoto", きょうと: "Kyoto", みえ: "Mie", みやぎ: "Miyagi", みやざき: "Miyazaki", ながの: "Nagano", ながさき: "Nagasaki", なら: "Nara", にいがた: "Niigata", おおいた: "Oita", おかやま: "Okayama", おきなわ: "Okinawa", おおさか: "Osaka", さが: "Saga", さいたま: "Saitama", しが: "Shiga", しまね: "Shimane", しずおか: "Shizuoka", とちぎ: "Tochigi", とくしま: "Tokushima", とうきょう: "Tokyo", とっとり: "Tottori", とやま: "Toyama", わかやま: "Wakayama", やまがた: "Yamagata", やまぐち: "Yamaguchi", やまなし: "Yamanashi", 愛知: "Aichi", 秋田: "Akita", 青森: "Aomori", 千葉: "Chiba", 愛媛: "Ehime", 福井: "Fukui", 福岡: "Fukuoka", 福島: "Fukushima", 岐阜: "Gifu", 群馬: "Gunma", 広島: "Hiroshima", 北海道: "Hokkaido", 兵庫: "Hyogo", 茨城: "Ibaraki", 石川: "Ishikawa", 岩手: "Iwate", 香川: "Kagawa", 鹿児島: "Kagoshima", 神奈川: "Kanagawa", 高知: "Kochi", 熊本: "Kumamoto", 京都: "Kyoto", 三重: "Mie", 宮城: "Miyagi", 宮崎: "Miyazaki", 長野: "Nagano", 長崎: "Nagasaki", 奈良: "Nara", 新潟: "Niigata", 大分: "Oita", 岡山: "Okayama", 沖縄: "Okinawa", 大阪: "Osaka", 佐賀: "Saga", 埼玉: "Saitama", 滋賀: "Shiga", 島根: "Shimane", 静岡: "Shizuoka", 栃木: "Tochigi", 徳島: "Tokushima", 東京: "Tokyo", 鳥取: "Tottori", 富山: "Toyama", 和歌山: "Wakayama", 山形: "Yamagata", 山口: "Yamaguchi", 山梨: "Yamanashi" }, activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/, FlashCardState = { Flipping: "Flipping", Flipped: "Flipped" }, currentState, previousLanguage, observer, matchedAnswer;
+  function katakanaToHiragana(s) {
+    let lower = "゠".codePointAt(0), upper = "ヿ".codePointAt(0), diff = "ア".codePointAt(0) - "あ".codePointAt(0);
+    return s.split("").map((c) => {
+      let point = c.codePointAt(0);
+      return point >= lower && point <= upper ? String.fromCodePoint(point - diff) : c;
+    }).join("");
+  }
+  function punctuationToSpace(s) {
+    return s.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/, " ");
+  }
+  function transformAnswers(raw) {
+    let results = [], answers = raw.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\(.*\)/, "").split(",").map((a) => a.trim().toLowerCase()).filter((a) => a.length != 0);
+    for (var i = 0; i < answers.length; i++) {
+      let answer = answers[i];
+      results.push(answer), punctuationToSpace(answer) !== answer && results.push(answer);
+    }
+    return results;
+  }
+  function getAnswers() {
+    var results = [];
+    let typeans = document.getElementById("typeans");
+    if (typeans !== null) {
+      let answers = typeans.getAttribute("answer");
+      answers !== null && (results = results.concat(transformAnswers(answers)));
+    }
+    let combinedans = document.getElementById("combinedans");
+    if (combinedans !== null) {
+      let answers = combinedans.innerHTML;
+      answers !== null && (results = results.concat(transformAnswers(answers)));
+    }
+    return results;
+  }
+  function markWrong() {
+    let incorrect = PluginBase.util.getLanguage() === "en-US" ? "wrong" : "あああ", typeans = document.getElementById("typeans");
+    typeans !== null && (typeans.value = incorrect, clickNext());
+  }
+  function compareAnswer(answer, transcript) {
+    return answer === transcript || transcript.replace(new RegExp(answer, "g"), "").length === 0;
+  }
+  function matchAnswer({ preTs, normTs }) {
+    let answers = getAnswers(), transcript = normTs.toLowerCase();
+    console.log("[Kitsun.matchAnswer] t=%s, a=%o", transcript, answers);
+    for (var i = 0; i < answers.length; i++) {
+      let answer = katakanaToHiragana(answers[i]), prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript);
+      if (compareAnswer(answer, transcript) || prefectureMatch)
+        return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
+    }
+    matchedAnswer = "";
+  }
+  function clickNext() {
+    let quizButtons = document.querySelectorAll("body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled");
+    if (quizButtons.length > 0) {
+      quizButtons.item(0).click();
+      return;
+    }
+    let nextans = document.getElementById("nextans"), nextButtons = document.querySelectorAll(".kitButton.flip_btn.kitButton__primary");
+    nextans !== null ? nextans.click() : nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[Kitsun.clickNext] failed to find next button");
+  }
+  function inputAnswer({ preTs, normTs }) {
+    if (matchedAnswer.length < 1) {
+      console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, normTs);
+      return;
+    }
+    let typeans = document.getElementById("typeans");
+    typeans !== null ? (typeans.value = matchedAnswer, clickNext()) : console.log("[Kitsun.inputAnswer] typeans was null");
+  }
+  function getLanguageFromQuest() {
+    let quests = document.getElementsByClassName("quest");
+    for (var found = !1, i = 0; i < quests.length; i++) {
+      let trimmed = quests[i].innerHTML.trim();
+      if (trimmed === "Vocabulary Meaning")
+        return "en";
+      if (trimmed === "Vocabulary Reading")
+        return "ja";
+    }
+    return null;
+  }
+  function getLanguageFromTypeans() {
+    let typeans = document.getElementById("typeans");
+    if (typeans === null)
+      return null;
+    let placeholder = typeans.getAttribute("placeholder");
+    if (placeholder === "English" || placeholder === "Meaning")
+      return "en";
+    if (placeholder === "Japanese" || placeholder === "Reading")
+      return "ja";
+    {
+      let lang = typeans.getAttribute("lang");
+      return lang === null || lang !== "ja" && lang !== "en" ? null : lang;
+    }
+  }
+  function setLanguage() {
+    if (isPrefecturesDeck())
+      return console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck"), PluginBase.util.setLanguage("ja"), !0;
+    var lang = getLanguageFromTypeans();
+    return lang !== null ? (console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)", lang), PluginBase.util.setLanguage(lang), !0) : (lang = getLanguageFromQuest(), lang !== null ? (console.log("[Kitsun.setLanguage] set to %s based on quest (10k)", lang), PluginBase.util.setLanguage(lang), !0) : (console.log("[Kitsun.setLanguage] failed to set language!"), !1));
+  }
+  function mutationCallback(mutations, observer2) {
+    console.log("[Kitsun.mutationCallback] " + FlashCardState[currentState]), currentState === FlashCardState.Flipping && document.location.href.match(activePages) && setLanguage() && (currentState = FlashCardState.Flipped);
+  }
+  function exitKitsunContext() {
+    console.log("[Kitsun.exitKitsunContext]"), PluginBase.util.enterContext(["Normal"]), previousLanguage !== null && PluginBase.util.setLanguage(previousLanguage), observer !== null && observer.disconnect();
+  }
+  function enterKitsunContext() {
+    console.log("[Kitsun.enterKitsunContext]"), currentState = FlashCardState.Flipping, PluginBase.util.enterContext(["Kitsun Review"]), previousLanguage = PluginBase.util.getLanguage();
+    let config = { attributes: !0, childList: !0, subtree: !0 };
+    observer = new MutationObserver(mutationCallback);
+    let mainContainer = document.getElementsByClassName("main-container")[0];
+    observer.observe(mainContainer, config), mutationCallback(null, null);
+  }
+  function locationChangeHandler() {
+    document.location.href.match(activePages) ? enterKitsunContext() : PluginBase.util.getContext().includes("Kitsun Review") && exitKitsunContext();
+  }
+  return { ...PluginBase, init: () => {
+    currentState = FlashCardState.Flipping, previousLanguage = PluginBase.util.getLanguage();
+    let src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -17,8 +286,173 @@ import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;var e=document.getElementsByTagName("head")[0],t=document.createElement("script");t.type="text/javascript",t.innerHTML=u,e.appendChild(t),window.addEventListener("locationchange",A),A()},destroy:()=>{window.removeEventListener("locationchange",A),y()},commands:{Answer:{match:{en:function({preTs:e,normTs:t}){let n=f(),a=t.toLowerCase();console.log("[Kitsun.matchAnswer] t=%s, a=%o",a,n);for(var s=0;s<n.length;s++){let o=p(n[s]),m=PluginBase.util.getLanguage()==="ja"&&n[s].match(/[a-zA-Z]+/)&&o===h(a);if(d(o,a)||m)return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s",n[s],o,a),i=n[s],[0,a.length,[n[s]]]}i=""},ja:function({preTs:e,normTs:t}){let n=f(),a=t.toLowerCase();console.log("[Kitsun.matchAnswer] t=%s, a=%o",a,n);for(var s=0;s<n.length;s++){let o=p(n[s]),m=PluginBase.util.getLanguage()==="ja"&&n[s].match(/[a-zA-Z]+/)&&o===h(a);if(d(o,a)||m)return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s",n[s],o,a),i=n[s],[0,a.length,[n[s]]]}i=""}},pageFn:function({preTs:e,normTs:t}){if(i.length<1){console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",i,t);return}let n=document.getElementById("typeans");n!==null?(n.value=i,c()):console.log("[Kitsun.inputAnswer] typeans was null")}},Next:{pageFn:()=>{l=r.Flipping,c()}},Wrong:{pageFn:function(){let t=PluginBase.util.getLanguage()==="en-US"?"wrong":"あああ",n=document.getElementById("typeans");n!==null&&(n.value=t,c())}}}}})();
-LS-SPLITallPlugins.Kitsun=(()=>{function A(){let u=document.getElementById("typeans");if(u===null)return!1;let e=u.getAttribute("placeholder");return e===null?!1:!!(e==="Enter Prefecture Name ..."||e.match(/Click on the.*Prefecture!/))}function E(u){let e=F[u];return e==null?u:e.toLowerCase()}var F={とうほく:"Tohoku",かんさい:"Kansai",かんとう:"Kanto",ちゅうぶ:"Chubu",ちゅうごく:"Chugoku",しこく:"Shikoku",きゅうしゅう:"Kyushu",あいち:"Aichi",あきた:"Akita",あおもり:"Aomori",ちば:"Chiba",えひめ:"Ehime",ふくい:"Fukui",ふくおか:"Fukuoka",ふくしま:"Fukushima",ぎふ:"Gifu",ぐんま:"Gunma",ひろしま:"Hiroshima",ほっかいどう:"Hokkaido",ひょうご:"Hyogo",いばらき:"Ibaraki",いしかわ:"Ishikawa",いわて:"Iwate",かがわ:"Kagawa",かごしま:"Kagoshima",かながわ:"Kanagawa",こうち:"Kochi",くまもと:"Kumamoto",きょうと:"Kyoto",みえ:"Mie",みやぎ:"Miyagi",みやざき:"Miyazaki",ながの:"Nagano",ながさき:"Nagasaki",なら:"Nara",にいがた:"Niigata",おおいた:"Oita",おかやま:"Okayama",おきなわ:"Okinawa",おおさか:"Osaka",さが:"Saga",さいたま:"Saitama",しが:"Shiga",しまね:"Shimane",しずおか:"Shizuoka",とちぎ:"Tochigi",とくしま:"Tokushima",とうきょう:"Tokyo",とっとり:"Tottori",とやま:"Toyama",わかやま:"Wakayama",やまがた:"Yamagata",やまぐち:"Yamaguchi",やまなし:"Yamanashi",愛知:"Aichi",秋田:"Akita",青森:"Aomori",千葉:"Chiba",愛媛:"Ehime",福井:"Fukui",福岡:"Fukuoka",福島:"Fukushima",岐阜:"Gifu",群馬:"Gunma",広島:"Hiroshima",北海道:"Hokkaido",兵庫:"Hyogo",茨城:"Ibaraki",石川:"Ishikawa",岩手:"Iwate",香川:"Kagawa",鹿児島:"Kagoshima",神奈川:"Kanagawa",高知:"Kochi",熊本:"Kumamoto",京都:"Kyoto",三重:"Mie",宮城:"Miyagi",宮崎:"Miyazaki",長野:"Nagano",長崎:"Nagasaki",奈良:"Nara",新潟:"Niigata",大分:"Oita",岡山:"Okayama",沖縄:"Okinawa",大阪:"Osaka",佐賀:"Saga",埼玉:"Saitama",滋賀:"Shiga",島根:"Shimane",静岡:"Shizuoka",栃木:"Tochigi",徳島:"Tokushima",東京:"Tokyo",鳥取:"Tottori",富山:"Toyama",和歌山:"Wakayama",山形:"Yamagata",山口:"Yamaguchi",山梨:"Yamanashi"},m=/^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/,s={Flipping:"Flipping",Flipped:"Flipped"},l=s.Flipping,f=PluginBase.util.getLanguage(),c=null;function k(u){let e="゠".codePointAt(0),t="ヿ".codePointAt(0),a="ア".codePointAt(0)-"あ".codePointAt(0);return u.split("").map(n=>{let i=n.codePointAt(0);return i>=e&&i<=t?String.fromCodePoint(i-a):n}).join("")}function w(u){return u.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/," ")}function h(u){let e=[],n=u.replace(/[\u200B-\u200D\uFEFF]/g,"").replace(/\(.*\)/,"").split(",").map(o=>o.trim().toLowerCase()).filter(o=>o.length!=0);for(var i=0;i<n.length;i++){let o=n[i];e.push(o),w(o)!==o&&e.push(o)}return e}function y(){var u=[];let e=document.getElementById("typeans");if(e!==null){let a=e.getAttribute("answer");a!==null&&(u=u.concat(h(a)))}let t=document.getElementById("combinedans");if(t!==null){let a=t.innerHTML;a!==null&&(u=u.concat(h(a)))}return u}var r="";function P(){let e=PluginBase.util.getLanguage()==="en-US"?"wrong":"あああ",t=document.getElementById("typeans");t!==null&&(t.value=e,p())}function B(u,e){return u===e||e.replace(new RegExp(u,"g"),"").length===0}function L({preTs:u,normTs:e}){let t=y(),a=e.toLowerCase();console.log("[Kitsun.matchAnswer] t=%s, a=%o",a,t);for(var n=0;n<t.length;n++){let i=k(t[n]),o=PluginBase.util.getLanguage()==="ja"&&t[n].match(/[a-zA-Z]+/)&&i===E(a);if(B(i,a)||o)return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s",t[n],i,a),r=t[n],[0,a.length,[t[n]]]}r=""}function p(){let u=document.querySelectorAll("body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled");if(u.length>0){u.item(0).click();return}let e=document.getElementById("nextans"),t=document.querySelectorAll(".kitButton.flip_btn.kitButton__primary");e!==null?e.click():t.length>0?t.item(0).click():console.log("[Kitsun.clickNext] failed to find next button")}function S({preTs:u,normTs:e}){if(r.length<1){console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",r,e);return}let t=document.getElementById("typeans");t!==null?(t.value=r,p()):console.log("[Kitsun.inputAnswer] typeans was null")}function v(){let u=document.getElementsByClassName("quest");for(var e=!1,t=0;t<u.length;t++){let n=u[t].innerHTML.trim();if(n==="Vocabulary Meaning")return"en";if(n==="Vocabulary Reading")return"ja"}return null}function K(){let u=document.getElementById("typeans");if(u===null)return null;let e=u.getAttribute("placeholder");if(e==="English"||e==="Meaning")return"en";if(e==="Japanese"||e==="Reading")return"ja";{let t=u.getAttribute("lang");return t===null||t!=="ja"&&t!=="en"?null:t}}function b(){if(A())return console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck"),PluginBase.util.setLanguage("ja"),!0;var u=K();return u!==null?(console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)",u),PluginBase.util.setLanguage(u),!0):(u=v(),u!==null?(console.log("[Kitsun.setLanguage] set to %s based on quest (10k)",u),PluginBase.util.setLanguage(u),!0):(console.log("[Kitsun.setLanguage] failed to set language!"),!1))}function d(u,e){console.log("[Kitsun.mutationCallback] "+s[l]),l===s.Flipping&&document.location.href.match(m)&&b()&&(l=s.Flipped)}function C(){console.log("[Kitsun.exitKitsunContext]"),PluginBase.util.enterContext(["Normal"]),PluginBase.util.setLanguage(f),c!==null&&c.disconnect()}function D(){console.log("[Kitsun.enterKitsunContext]"),l=s.Flipping,PluginBase.util.enterContext(["Kitsun Review"]),f=PluginBase.util.getLanguage();let u={attributes:!0,childList:!0,subtree:!0};c=new MutationObserver(d);let e=document.getElementsByClassName("main-container")[0];c.observe(e,u),d(null,null)}function g(){document.location.href.match(m)?D():PluginBase.util.getContext().includes("Kitsun Review")&&C()}return{...PluginBase,init:()=>{let u=`history.pushState = ( f => function pushState(){
+        })(history.replaceState);`;
+    var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
+    script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
+  }, destroy: () => {
+    window.removeEventListener("locationchange", locationChangeHandler), exitKitsunContext();
+  }, commands: { Answer: { match: { en: function({ preTs, normTs }) {
+    let answers = getAnswers(), transcript = normTs.toLowerCase();
+    console.log("[Kitsun.matchAnswer] t=%s, a=%o", transcript, answers);
+    for (var i = 0; i < answers.length; i++) {
+      let answer = katakanaToHiragana(answers[i]), prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript);
+      if (compareAnswer(answer, transcript) || prefectureMatch)
+        return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
+    }
+    matchedAnswer = "";
+  }, ja: function({ preTs, normTs }) {
+    let answers = getAnswers(), transcript = normTs.toLowerCase();
+    console.log("[Kitsun.matchAnswer] t=%s, a=%o", transcript, answers);
+    for (var i = 0; i < answers.length; i++) {
+      let answer = katakanaToHiragana(answers[i]), prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript);
+      if (compareAnswer(answer, transcript) || prefectureMatch)
+        return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
+    }
+    matchedAnswer = "";
+  } }, pageFn: function({ preTs, normTs }) {
+    if (matchedAnswer.length < 1) {
+      console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, normTs);
+      return;
+    }
+    let typeans = document.getElementById("typeans");
+    typeans !== null ? (typeans.value = matchedAnswer, clickNext()) : console.log("[Kitsun.inputAnswer] typeans was null");
+  } }, Next: { pageFn: () => {
+    currentState = FlashCardState.Flipping, clickNext();
+  } }, Wrong: { pageFn: function() {
+    let incorrect = PluginBase.util.getLanguage() === "en-US" ? "wrong" : "あああ", typeans = document.getElementById("typeans");
+    typeans !== null && (typeans.value = incorrect, clickNext());
+  } } } };
+})();
+LS-SPLIT// dist/tmp/Kitsun/Kitsun.js
+allPlugins.Kitsun = (() => {
+  function isPrefecturesDeck() {
+    let typeans = document.getElementById("typeans");
+    if (typeans === null)
+      return !1;
+    let placeholder = typeans.getAttribute("placeholder");
+    return placeholder === null ? !1 : !!(placeholder === "Enter Prefecture Name ..." || placeholder.match(/Click on the.*Prefecture!/));
+  }
+  function prefectureToRomaji(ja) {
+    let maybe = prefectures[ja];
+    return maybe == null ? ja : maybe.toLowerCase();
+  }
+  var prefectures = { とうほく: "Tohoku", かんさい: "Kansai", かんとう: "Kanto", ちゅうぶ: "Chubu", ちゅうごく: "Chugoku", しこく: "Shikoku", きゅうしゅう: "Kyushu", あいち: "Aichi", あきた: "Akita", あおもり: "Aomori", ちば: "Chiba", えひめ: "Ehime", ふくい: "Fukui", ふくおか: "Fukuoka", ふくしま: "Fukushima", ぎふ: "Gifu", ぐんま: "Gunma", ひろしま: "Hiroshima", ほっかいどう: "Hokkaido", ひょうご: "Hyogo", いばらき: "Ibaraki", いしかわ: "Ishikawa", いわて: "Iwate", かがわ: "Kagawa", かごしま: "Kagoshima", かながわ: "Kanagawa", こうち: "Kochi", くまもと: "Kumamoto", きょうと: "Kyoto", みえ: "Mie", みやぎ: "Miyagi", みやざき: "Miyazaki", ながの: "Nagano", ながさき: "Nagasaki", なら: "Nara", にいがた: "Niigata", おおいた: "Oita", おかやま: "Okayama", おきなわ: "Okinawa", おおさか: "Osaka", さが: "Saga", さいたま: "Saitama", しが: "Shiga", しまね: "Shimane", しずおか: "Shizuoka", とちぎ: "Tochigi", とくしま: "Tokushima", とうきょう: "Tokyo", とっとり: "Tottori", とやま: "Toyama", わかやま: "Wakayama", やまがた: "Yamagata", やまぐち: "Yamaguchi", やまなし: "Yamanashi", 愛知: "Aichi", 秋田: "Akita", 青森: "Aomori", 千葉: "Chiba", 愛媛: "Ehime", 福井: "Fukui", 福岡: "Fukuoka", 福島: "Fukushima", 岐阜: "Gifu", 群馬: "Gunma", 広島: "Hiroshima", 北海道: "Hokkaido", 兵庫: "Hyogo", 茨城: "Ibaraki", 石川: "Ishikawa", 岩手: "Iwate", 香川: "Kagawa", 鹿児島: "Kagoshima", 神奈川: "Kanagawa", 高知: "Kochi", 熊本: "Kumamoto", 京都: "Kyoto", 三重: "Mie", 宮城: "Miyagi", 宮崎: "Miyazaki", 長野: "Nagano", 長崎: "Nagasaki", 奈良: "Nara", 新潟: "Niigata", 大分: "Oita", 岡山: "Okayama", 沖縄: "Okinawa", 大阪: "Osaka", 佐賀: "Saga", 埼玉: "Saitama", 滋賀: "Shiga", 島根: "Shimane", 静岡: "Shizuoka", 栃木: "Tochigi", 徳島: "Tokushima", 東京: "Tokyo", 鳥取: "Tottori", 富山: "Toyama", 和歌山: "Wakayama", 山形: "Yamagata", 山口: "Yamaguchi", 山梨: "Yamanashi" }, activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/, FlashCardState = { Flipping: "Flipping", Flipped: "Flipped" }, currentState, previousLanguage, observer, matchedAnswer;
+  function katakanaToHiragana(s) {
+    let lower = "゠".codePointAt(0), upper = "ヿ".codePointAt(0), diff = "ア".codePointAt(0) - "あ".codePointAt(0);
+    return s.split("").map((c) => {
+      let point = c.codePointAt(0);
+      return point >= lower && point <= upper ? String.fromCodePoint(point - diff) : c;
+    }).join("");
+  }
+  function punctuationToSpace(s) {
+    return s.replace(/[!"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~"]/, " ");
+  }
+  function transformAnswers(raw) {
+    let results = [], answers = raw.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\(.*\)/, "").split(",").map((a) => a.trim().toLowerCase()).filter((a) => a.length != 0);
+    for (var i = 0; i < answers.length; i++) {
+      let answer = answers[i];
+      results.push(answer), punctuationToSpace(answer) !== answer && results.push(answer);
+    }
+    return results;
+  }
+  function getAnswers() {
+    var results = [];
+    let typeans = document.getElementById("typeans");
+    if (typeans !== null) {
+      let answers = typeans.getAttribute("answer");
+      answers !== null && (results = results.concat(transformAnswers(answers)));
+    }
+    let combinedans = document.getElementById("combinedans");
+    if (combinedans !== null) {
+      let answers = combinedans.innerHTML;
+      answers !== null && (results = results.concat(transformAnswers(answers)));
+    }
+    return results;
+  }
+  function markWrong() {
+    let incorrect = PluginBase.util.getLanguage() === "en-US" ? "wrong" : "あああ", typeans = document.getElementById("typeans");
+    typeans !== null && (typeans.value = incorrect, clickNext());
+  }
+  function compareAnswer(answer, transcript) {
+    return answer === transcript || transcript.replace(new RegExp(answer, "g"), "").length === 0;
+  }
+  function matchAnswer({ preTs, normTs }) {
+    let answers = getAnswers(), transcript = normTs.toLowerCase();
+    console.log("[Kitsun.matchAnswer] t=%s, a=%o", transcript, answers);
+    for (var i = 0; i < answers.length; i++) {
+      let answer = katakanaToHiragana(answers[i]), prefectureMatch = PluginBase.util.getLanguage() === "ja" && answers[i].match(/[a-zA-Z]+/) && answer === prefectureToRomaji(transcript);
+      if (compareAnswer(answer, transcript) || prefectureMatch)
+        return console.log("[Kitsun.matchAnswer] a=%s h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
+    }
+    matchedAnswer = "";
+  }
+  function clickNext() {
+    let quizButtons = document.querySelectorAll("body > div.swal2-container.swal2-center.swal2-fade.swal2-shown > div > div.swal2-buttonswrapper > button.swal2-confirm.swal2-styled");
+    if (quizButtons.length > 0) {
+      quizButtons.item(0).click();
+      return;
+    }
+    let nextans = document.getElementById("nextans"), nextButtons = document.querySelectorAll(".kitButton.flip_btn.kitButton__primary");
+    nextans !== null ? nextans.click() : nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[Kitsun.clickNext] failed to find next button");
+  }
+  function inputAnswer({ preTs, normTs }) {
+    if (matchedAnswer.length < 1) {
+      console.log("[Kitsun.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, normTs);
+      return;
+    }
+    let typeans = document.getElementById("typeans");
+    typeans !== null ? (typeans.value = matchedAnswer, clickNext()) : console.log("[Kitsun.inputAnswer] typeans was null");
+  }
+  function getLanguageFromQuest() {
+    let quests = document.getElementsByClassName("quest");
+    for (var found = !1, i = 0; i < quests.length; i++) {
+      let trimmed = quests[i].innerHTML.trim();
+      if (trimmed === "Vocabulary Meaning")
+        return "en";
+      if (trimmed === "Vocabulary Reading")
+        return "ja";
+    }
+    return null;
+  }
+  function getLanguageFromTypeans() {
+    let typeans = document.getElementById("typeans");
+    if (typeans === null)
+      return null;
+    let placeholder = typeans.getAttribute("placeholder");
+    if (placeholder === "English" || placeholder === "Meaning")
+      return "en";
+    if (placeholder === "Japanese" || placeholder === "Reading")
+      return "ja";
+    {
+      let lang = typeans.getAttribute("lang");
+      return lang === null || lang !== "ja" && lang !== "en" ? null : lang;
+    }
+  }
+  function setLanguage() {
+    if (isPrefecturesDeck())
+      return console.log("[Kitsun.setLanguage] set to Japanese for prefectures deck"), PluginBase.util.setLanguage("ja"), !0;
+    var lang = getLanguageFromTypeans();
+    return lang !== null ? (console.log("[Kitsun.setLanguage] set to %s based on typeans (10k/user deck)", lang), PluginBase.util.setLanguage(lang), !0) : (lang = getLanguageFromQuest(), lang !== null ? (console.log("[Kitsun.setLanguage] set to %s based on quest (10k)", lang), PluginBase.util.setLanguage(lang), !0) : (console.log("[Kitsun.setLanguage] failed to set language!"), !1));
+  }
+  function mutationCallback(mutations, observer2) {
+    console.log("[Kitsun.mutationCallback] " + FlashCardState[currentState]), currentState === FlashCardState.Flipping && document.location.href.match(activePages) && setLanguage() && (currentState = FlashCardState.Flipped);
+  }
+  function exitKitsunContext() {
+    console.log("[Kitsun.exitKitsunContext]"), PluginBase.util.enterContext(["Normal"]), previousLanguage !== null && PluginBase.util.setLanguage(previousLanguage), observer !== null && observer.disconnect();
+  }
+  function enterKitsunContext() {
+    console.log("[Kitsun.enterKitsunContext]"), currentState = FlashCardState.Flipping, PluginBase.util.enterContext(["Kitsun Review"]), previousLanguage = PluginBase.util.getLanguage();
+    let config = { attributes: !0, childList: !0, subtree: !0 };
+    observer = new MutationObserver(mutationCallback);
+    let mainContainer = document.getElementsByClassName("main-container")[0];
+    observer.observe(mainContainer, config), mutationCallback(null, null);
+  }
+  function locationChangeHandler() {
+    document.location.href.match(activePages) ? enterKitsunContext() : PluginBase.util.getContext().includes("Kitsun Review") && exitKitsunContext();
+  }
+  return { ...PluginBase, init: () => {
+    currentState = FlashCardState.Flipping, previousLanguage = PluginBase.util.getLanguage();
+    let src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -27,4 +461,10 @@ import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;var e=document.getElementsByTagName("head")[0],t=document.createElement("script");t.type="text/javascript",t.innerHTML=u,e.appendChild(t),window.addEventListener("locationchange",g),g()},destroy:()=>{window.removeEventListener("locationchange",g),C()},commands:{}}})();
+        })(history.replaceState);`;
+    var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
+    script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
+  }, destroy: () => {
+    window.removeEventListener("locationchange", locationChangeHandler), exitKitsunContext();
+  }, commands: {} };
+})();
