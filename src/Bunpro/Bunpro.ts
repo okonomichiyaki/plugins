@@ -7,7 +7,7 @@ declare const PluginBase: IPluginBase;
 var matchedAnswer: string = "";
 
 // stores the previous language before we started Bunpro context
-var previousLanguage: LanguageCode = PluginBase.util.getLanguage();
+var previousLanguage: LanguageCode;
 
 const particles: { [key: string]: string } = {
     "もう":"も",
@@ -33,8 +33,8 @@ function getAnswers(): string[] {
         .filter(notEmpty);
 }
 
-export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
-    transcript = transcript.toLowerCase();
+export function matchAnswer({preTs, normTs}: TsData): [number, number, any[]?]|undefined|false {
+    let transcript = normTs.toLowerCase();
     const answers = getAnswers();
     console.log("[Bunpro.matchAnswer] t=%s,a=%o",transcript, answers);
     for (var i = 0; i < answers.length; i++) {
@@ -49,7 +49,8 @@ export function matchAnswer(transcript: string): [number, number, any[]?]|undefi
     return undefined;
 }
 
-function inputAnswer(transcript: string) {
+function inputAnswer({preTs, normTs}: TsData) {
+    let transcript = normTs;
     // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
         console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
@@ -66,7 +67,7 @@ function inputAnswer(transcript: string) {
 
 function markWrong() {
     matchedAnswer = "あああ";
-    inputAnswer(matchedAnswer);
+    inputAnswer({preTs: "", normTs: matchedAnswer});
 }
 
 function clickElement(selector: string) {
@@ -108,7 +109,9 @@ function enterBunproContext() {
 function exitBunproContext() {
     console.log("[Bunpro.exitBunproContext]");
     PluginBase.util.enterContext(["Normal"]);
-    PluginBase.util.setLanguage(previousLanguage);
+    if (previousLanguage !== null) {
+        PluginBase.util.setLanguage(previousLanguage);
+    }
 }
 
 function locationChangeHandler() {
@@ -124,8 +127,10 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "Bunpro",
     description: "",
     match: /.*bunpro.jp.*/,
-    version: "0.0.3",
+    apiVersion: 2,
+    version: "0.0.4",
     init: () => {
+        previousLanguage = PluginBase.util.getLanguage();
         const src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
