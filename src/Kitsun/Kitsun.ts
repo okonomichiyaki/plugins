@@ -24,7 +24,9 @@ function katakanaToHiragana(s: string): string {
     const diff = "ア".codePointAt(0)! - "あ".codePointAt(0)!
     return s.split("").map(c => {
         const point = c.codePointAt(0)!;
-        if (point >= lower && point <= upper) {
+        if (c === "ー") { //コンピューター => こんぴゅーたー
+            return c;
+        } else if (point >= lower && point <= upper) {
             return String.fromCodePoint(point - diff);
         } else {
             return c;
