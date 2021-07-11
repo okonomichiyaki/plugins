@@ -11,7 +11,7 @@ interface KaniWaniAnswer {
     kana: string
 }
 
-let previousLanguage: LanguageCode = PluginBase.util.getLanguage();
+let previousLanguage: LanguageCode;
 
 // converts katakana characters in the string to hiragana. will be a no-op if no katakana
 function katakanaToHiragana(s: string): string {
@@ -64,9 +64,9 @@ export function markWrong() {
     }, 100);
 }
 
-export function matchAnswer(transcript: string): [number, number, any[]?]|undefined|false {
+export function matchAnswer({preTs, normTs}: TsData): [number, number, any[]?]|undefined|false {
     const answers = getAnswers();
-    transcript = transcript.toLowerCase();
+    let transcript = normTs.toLowerCase();
     console.log("[KaniWani.matchAnswer] t=%s,a=%o",transcript,answers);
     for (var i = 0; i < answers.length; i++) {
         const answer = katakanaToHiragana(answers[i].kana);
@@ -90,7 +90,8 @@ function clickNext() {
     }
 }
 
-function inputAnswer(transcript: string) {
+function inputAnswer({preTs, normTs}: TsData) {
+    let transcript = normTs;
     // assumes that we matched a correct answer, so input the stored matched answer:
     if (matchedAnswer.length < 1) {
         console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
@@ -130,8 +131,10 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     niceName: "KaniWani",
     description: "",
     match: kaniwaniDotCom,
-    version: "0.0.1",
+    version: "0.0.2",
+    apiVersion: 2,
     init: () => {
+        previousLanguage = PluginBase.util.getLanguage();
         const src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
