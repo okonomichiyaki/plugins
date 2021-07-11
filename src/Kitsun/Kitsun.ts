@@ -4,8 +4,12 @@ import { prefectureToRomaji, isPrefecturesDeck } from "./prefectures";
 
 declare const PluginBase: IPluginBase;
 
-let activePages: RegExp;
-let FlashCardState: { Flipping: string, Flipped: string };
+const activePages: RegExp = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/;
+const FlashCardState: { Flipping: string, Flipped: string } = {
+    "Flipping":"Flipping",
+    "Flipped":"Flipped"
+};
+
 let currentState: string;
 let previousLanguage: LanguageCode;
 let observer: MutationObserver | null;
@@ -272,11 +276,6 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     apiVersion: 2,
     version: "0.0.4",
     init: () => {
-        activePages = /^https:\/\/kitsun\.io\/deck\/.*\/(reviews|lessons|selfstudy)$/;
-        FlashCardState = {
-            "Flipping":"Flipping",
-            "Flipped":"Flipped"
-        };
         currentState = FlashCardState.Flipping;
         previousLanguage = PluginBase.util.getLanguage();
         const src = `history.pushState = ( f => function pushState(){
