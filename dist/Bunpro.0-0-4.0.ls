@@ -1,62 +1,4 @@
-import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';// dist/tmp/Bunpro/Bunpro.js
-var matchedAnswer = "", previousLanguage, particles = { もう: "も", わ: "は" };
-function fuzzyParticle(transcript) {
-  let maybe = particles[transcript];
-  return maybe === null ? transcript : maybe;
-}
-function notEmpty(value) {
-  return value != null;
-}
-function getAnswers() {
-  return Array.from(document.querySelectorAll("#answer_in_kana")).map((answer) => answer.getAttribute("data-answer")).filter(notEmpty);
-}
-function matchAnswer({ preTs, normTs }) {
-  let transcript = normTs.toLowerCase(), answers = getAnswers();
-  console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
-  for (var i = 0; i < answers.length; i++) {
-    let hiragana = answers[i];
-    if (hiragana === transcript || hiragana === fuzzyParticle(transcript))
-      return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
-  }
-  matchedAnswer = "";
-}
-function inputAnswer({ preTs, normTs }) {
-  let transcript = normTs;
-  if (matchedAnswer.length < 1) {
-    console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-    return;
-  }
-  let studyAreaInput = document.getElementById("study-answer-input");
-  studyAreaInput !== null ? (studyAreaInput.value = matchedAnswer, clickNext()) : console.log("[Bunpro.inputAnswer] studyAreaInput was null");
-}
-function markWrong() {
-  matchedAnswer = "あああ", inputAnswer({ preTs: "", normTs: matchedAnswer });
-}
-function clickElement(selector) {
-  let element = document.querySelector(selector);
-  element !== null ? element.click() : console.log("[Bunpro.clickElement] %s was null", selector);
-}
-function clickNext() {
-  clickElement("#submit-study-answer");
-}
-function clickHint() {
-  clickElement("#show-english-hint");
-}
-function clickShowGrammar() {
-  clickElement("#show-grammar");
-}
-function enterBunproContext() {
-  console.log("[Bunpro.enterBunproContext]"), previousLanguage = PluginBase.util.getLanguage(), PluginBase.util.enterContext(["Bunpro"]), PluginBase.util.setLanguage("ja");
-}
-function exitBunproContext() {
-  console.log("[Bunpro.exitBunproContext]"), PluginBase.util.enterContext(["Normal"]), previousLanguage !== null && PluginBase.util.setLanguage(previousLanguage);
-}
-function locationChangeHandler() {
-  console.log("[Bunpro.locationChangeHandler] href=%s", document.location.href), document.location.href.match(/.*bunpro.jp\/(learn|study|cram)$/) ? enterBunproContext() : exitBunproContext();
-}
-var Bunpro_default = { ...PluginBase, languages: {}, niceName: "Bunpro", description: "", match: /.*bunpro.jp.*/, apiVersion: 2, version: "0.0.4", init: () => {
-  previousLanguage = PluginBase.util.getLanguage();
-  let src = `history.pushState = ( f => function pushState(){
+import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';var r="",o,w=/^https?:\/\/(www\.)?bunpro\.jp\/(learn|study|cram)/,B={もう:"も",わ:"は"};function l(){setTimeout(h,200)}function v(n){let e=B[n];return e===null?n:e}function y(n){return n!=null}function E(){return Array.from(document.querySelectorAll("#answer_in_kana")).map(n=>n.getAttribute("data-answer")).filter(y)}function p({preTs:n,normTs:e}){let t=e.toLowerCase(),a=E();console.log("[Bunpro.matchAnswer] t=%s,a=%o",t,a);for(var u=0;u<a.length;u++){let i=a[u];if(i===t||i===v(t))return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s",a[u],i,t),r=a[u],[0,t.length,[a[u]]]}r=""}function m({preTs:n,normTs:e}){let t=e;if(r.length<1){console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",r,t);return}let a=document.getElementById("study-answer-input");a!==null?(a.value=r,g()):console.log("[Bunpro.inputAnswer] studyAreaInput was null")}function x(){r="あああ",m({preTs:"",normTs:r})}function s(n){let e=document.querySelector(n);e!==null?e.click():console.log("[Bunpro.clickElement] %s was null",n)}function g(){s("#submit-study-answer")}function A(){s("#show-english-hint")}function L(){s("#show-grammar")}function h(){console.log("[Bunpro.enterBunproContext]"),o=PluginBase.util.getLanguage(),PluginBase.util.enterContext(["Bunpro"]),PluginBase.util.setLanguage("ja")}function d(){console.log("[Bunpro.exitBunproContext]"),PluginBase.util.enterContext(["Normal"]),o!==null&&PluginBase.util.setLanguage(o)}function c(){console.log("[Bunpro.locationChangeHandler] href=%s",document.location.href),document.location.href.match(w)?h():d()}var f={...PluginBase,languages:{},niceName:"Bunpro",description:"",match:/.*bunpro.jp.*/,apiVersion:2,version:"0.0.4",init:()=>{window.addEventListener("blur",l,!0),o=PluginBase.util.getLanguage();let n=`history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -65,77 +7,8 @@ var Bunpro_default = { ...PluginBase, languages: {}, niceName: "Bunpro", descrip
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;
-  var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
-  script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
-}, destroy: () => {
-  window.removeEventListener("locationchange", locationChangeHandler), exitBunproContext();
-}, contexts: { Bunpro: { commands: ["LipSurf.Change Language to Japanese", "LipSurf.Normal Mode", "LipSurf.Turn off LipSurf", "Answer", "Hint", "Next", "Wrong", "Info"] } }, commands: [{ name: "Answer", description: "Submit an answer for a Bunpro review", match: { description: "[answer]", fn: matchAnswer }, normal: !1, pageFn: inputAnswer }, { name: "Hint", description: "Toggle the translated hint", match: "hint", normal: !1, pageFn: clickHint }, { name: "Next", description: "Go to the next card", match: "next", normal: !1, pageFn: clickNext }, { name: "Wrong", description: "Mark a card wrong", match: "wrong", normal: !1, pageFn: markWrong }, { name: "Info", description: "Show grammar info", match: "info", normal: !1, pageFn: clickShowGrammar }] };
-Bunpro_default.languages.ja = { niceName: "Bunpro", description: "Bunpro", commands: { Answer: { name: "答え (answer)", match: { description: "[Bunproの答え]", fn: matchAnswer } }, Hint: { name: "暗示 (hint)", match: ["ひんと", "あんじ"] }, Next: { name: "次へ (next)", match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"] }, Wrong: { name: "バツ (wrong)", match: ["だめ", "ばつ"] }, Info: { name: "情報 (info)", match: ["じょうほう"] } } };
-var dumby_default = Bunpro_default;
-export {
-  dumby_default as default
-};
-LS-SPLIT// dist/tmp/Bunpro/Bunpro.js
-allPlugins.Bunpro = (() => {
-  var matchedAnswer = "", previousLanguage, particles = { もう: "も", わ: "は" };
-  function fuzzyParticle(transcript) {
-    let maybe = particles[transcript];
-    return maybe === null ? transcript : maybe;
-  }
-  function notEmpty(value) {
-    return value != null;
-  }
-  function getAnswers() {
-    return Array.from(document.querySelectorAll("#answer_in_kana")).map((answer) => answer.getAttribute("data-answer")).filter(notEmpty);
-  }
-  function matchAnswer({ preTs, normTs }) {
-    let transcript = normTs.toLowerCase(), answers = getAnswers();
-    console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let hiragana = answers[i];
-      if (hiragana === transcript || hiragana === fuzzyParticle(transcript))
-        return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
-    }
-    matchedAnswer = "";
-  }
-  function inputAnswer({ preTs, normTs }) {
-    let transcript = normTs;
-    if (matchedAnswer.length < 1) {
-      console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-      return;
-    }
-    let studyAreaInput = document.getElementById("study-answer-input");
-    studyAreaInput !== null ? (studyAreaInput.value = matchedAnswer, clickNext()) : console.log("[Bunpro.inputAnswer] studyAreaInput was null");
-  }
-  function markWrong() {
-    matchedAnswer = "あああ", inputAnswer({ preTs: "", normTs: matchedAnswer });
-  }
-  function clickElement(selector) {
-    let element = document.querySelector(selector);
-    element !== null ? element.click() : console.log("[Bunpro.clickElement] %s was null", selector);
-  }
-  function clickNext() {
-    clickElement("#submit-study-answer");
-  }
-  function clickHint() {
-    clickElement("#show-english-hint");
-  }
-  function clickShowGrammar() {
-    clickElement("#show-grammar");
-  }
-  function enterBunproContext() {
-    console.log("[Bunpro.enterBunproContext]"), previousLanguage = PluginBase.util.getLanguage(), PluginBase.util.enterContext(["Bunpro"]), PluginBase.util.setLanguage("ja");
-  }
-  function exitBunproContext() {
-    console.log("[Bunpro.exitBunproContext]"), PluginBase.util.enterContext(["Normal"]), previousLanguage !== null && PluginBase.util.setLanguage(previousLanguage);
-  }
-  function locationChangeHandler() {
-    console.log("[Bunpro.locationChangeHandler] href=%s", document.location.href), document.location.href.match(/.*bunpro.jp\/(learn|study|cram)$/) ? enterBunproContext() : exitBunproContext();
-  }
-  return { ...PluginBase, init: () => {
-    previousLanguage = PluginBase.util.getLanguage();
-    let src = `history.pushState = ( f => function pushState(){
+        })(history.replaceState);`;var e=document.getElementsByTagName("head")[0],t=document.createElement("script");t.type="text/javascript",t.innerHTML=n,e.appendChild(t),window.addEventListener("locationchange",c),c()},destroy:()=>{window.removeEventListener("blur",l),window.removeEventListener("locationchange",c),d()},contexts:{Bunpro:{commands:["LipSurf.Change Language to Japanese","LipSurf.Normal Mode","LipSurf.Turn off LipSurf","Answer","Hint","Next","Wrong","Info"]}},commands:[{name:"Answer",description:"Submit an answer for a Bunpro review",match:{description:"[answer]",fn:p},normal:!1,pageFn:m},{name:"Hint",description:"Toggle the translated hint",match:"hint",normal:!1,pageFn:A},{name:"Next",description:"Go to the next card",match:"next",normal:!1,pageFn:g},{name:"Wrong",description:"Mark a card wrong",match:"wrong",normal:!1,pageFn:x},{name:"Info",description:"Show grammar info",match:"info",normal:!1,pageFn:L}]};f.languages.ja={niceName:"Bunpro",description:"Bunpro",commands:{Answer:{name:"答え (answer)",match:{description:"[Bunproの答え]",fn:p}},Hint:{name:"暗示 (hint)",match:["ひんと","あんじ"]},Next:{name:"次へ (next)",match:["つぎ","ねくすと","ていしゅつ","すすむ","ちぇっく"]},Wrong:{name:"バツ (wrong)",match:["だめ","ばつ"]},Info:{name:"情報 (info)",match:["じょうほう"]}}};var S=f;export{S as default};
+LS-SPLITallPlugins.Bunpro=(()=>{var o="",l,B=/^https?:\/\/(www\.)?bunpro\.jp\/(learn|study|cram)/,v={もう:"も",わ:"は"};function m(){setTimeout(d,200)}function i(t){let a=v[t];return a===null?t:a}function A(t){return t!=null}function p(){return Array.from(document.querySelectorAll("#answer_in_kana")).map(t=>t.getAttribute("data-answer")).filter(A)}function y({preTs:t,normTs:a}){let r=a.toLowerCase(),n=p();console.log("[Bunpro.matchAnswer] t=%s,a=%o",r,n);for(var e=0;e<n.length;e++){let u=n[e];if(u===r||u===i(r))return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s",n[e],u,r),o=n[e],[0,r.length,[n[e]]]}o=""}function h({preTs:t,normTs:a}){let r=a;if(o.length<1){console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",o,r);return}let n=document.getElementById("study-answer-input");n!==null?(n.value=o,w()):console.log("[Bunpro.inputAnswer] studyAreaInput was null")}function E(){o="あああ",h({preTs:"",normTs:o})}function c(t){let a=document.querySelector(t);a!==null?a.click():console.log("[Bunpro.clickElement] %s was null",t)}function w(){c("#submit-study-answer")}function C(){c("#show-english-hint")}function x(){c("#show-grammar")}function d(){console.log("[Bunpro.enterBunproContext]"),l=PluginBase.util.getLanguage(),PluginBase.util.enterContext(["Bunpro"]),PluginBase.util.setLanguage("ja")}function f(){console.log("[Bunpro.exitBunproContext]"),PluginBase.util.enterContext(["Normal"]),l!==null&&PluginBase.util.setLanguage(l)}function g(){console.log("[Bunpro.locationChangeHandler] href=%s",document.location.href),document.location.href.match(B)?d():f()}return{...PluginBase,init:()=>{window.addEventListener("blur",m,!0),l=PluginBase.util.getLanguage();let t=`history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -144,107 +17,8 @@ allPlugins.Bunpro = (() => {
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;
-    var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
-    script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
-  }, destroy: () => {
-    window.removeEventListener("locationchange", locationChangeHandler), exitBunproContext();
-  }, commands: { Answer: { match: { en: function({ preTs, normTs }) {
-    let transcript = normTs.toLowerCase(), answers = getAnswers();
-    console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let hiragana = answers[i];
-      if (hiragana === transcript || hiragana === fuzzyParticle(transcript))
-        return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
-    }
-    matchedAnswer = "";
-  }, ja: function({ preTs, normTs }) {
-    let transcript = normTs.toLowerCase(), answers = getAnswers();
-    console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let hiragana = answers[i];
-      if (hiragana === transcript || hiragana === fuzzyParticle(transcript))
-        return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
-    }
-    matchedAnswer = "";
-  } }, pageFn: function({ preTs, normTs }) {
-    let transcript = normTs;
-    if (matchedAnswer.length < 1) {
-      console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-      return;
-    }
-    let studyAreaInput = document.getElementById("study-answer-input");
-    studyAreaInput !== null ? (studyAreaInput.value = matchedAnswer, clickNext()) : console.log("[Bunpro.inputAnswer] studyAreaInput was null");
-  } }, Hint: { pageFn: function() {
-    clickElement("#show-english-hint");
-  } }, Next: { pageFn: function() {
-    clickElement("#submit-study-answer");
-  } }, Wrong: { pageFn: function() {
-    matchedAnswer = "あああ", inputAnswer({ preTs: "", normTs: matchedAnswer });
-  } }, Info: { pageFn: function() {
-    clickElement("#show-grammar");
-  } } } };
-})();
-LS-SPLIT// dist/tmp/Bunpro/Bunpro.js
-allPlugins.Bunpro = (() => {
-  var matchedAnswer = "", previousLanguage, particles = { もう: "も", わ: "は" };
-  function fuzzyParticle(transcript) {
-    let maybe = particles[transcript];
-    return maybe === null ? transcript : maybe;
-  }
-  function notEmpty(value) {
-    return value != null;
-  }
-  function getAnswers() {
-    return Array.from(document.querySelectorAll("#answer_in_kana")).map((answer) => answer.getAttribute("data-answer")).filter(notEmpty);
-  }
-  function matchAnswer({ preTs, normTs }) {
-    let transcript = normTs.toLowerCase(), answers = getAnswers();
-    console.log("[Bunpro.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let hiragana = answers[i];
-      if (hiragana === transcript || hiragana === fuzzyParticle(transcript))
-        return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s", answers[i], hiragana, transcript), matchedAnswer = answers[i], [0, transcript.length, [answers[i]]];
-    }
-    matchedAnswer = "";
-  }
-  function inputAnswer({ preTs, normTs }) {
-    let transcript = normTs;
-    if (matchedAnswer.length < 1) {
-      console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-      return;
-    }
-    let studyAreaInput = document.getElementById("study-answer-input");
-    studyAreaInput !== null ? (studyAreaInput.value = matchedAnswer, clickNext()) : console.log("[Bunpro.inputAnswer] studyAreaInput was null");
-  }
-  function markWrong() {
-    matchedAnswer = "あああ", inputAnswer({ preTs: "", normTs: matchedAnswer });
-  }
-  function clickElement(selector) {
-    let element = document.querySelector(selector);
-    element !== null ? element.click() : console.log("[Bunpro.clickElement] %s was null", selector);
-  }
-  function clickNext() {
-    clickElement("#submit-study-answer");
-  }
-  function clickHint() {
-    clickElement("#show-english-hint");
-  }
-  function clickShowGrammar() {
-    clickElement("#show-grammar");
-  }
-  function enterBunproContext() {
-    console.log("[Bunpro.enterBunproContext]"), previousLanguage = PluginBase.util.getLanguage(), PluginBase.util.enterContext(["Bunpro"]), PluginBase.util.setLanguage("ja");
-  }
-  function exitBunproContext() {
-    console.log("[Bunpro.exitBunproContext]"), PluginBase.util.enterContext(["Normal"]), previousLanguage !== null && PluginBase.util.setLanguage(previousLanguage);
-  }
-  function locationChangeHandler() {
-    console.log("[Bunpro.locationChangeHandler] href=%s", document.location.href), document.location.href.match(/.*bunpro.jp\/(learn|study|cram)$/) ? enterBunproContext() : exitBunproContext();
-  }
-  return { ...PluginBase, init: () => {
-    previousLanguage = PluginBase.util.getLanguage();
-    let src = `history.pushState = ( f => function pushState(){
+        })(history.replaceState);`;var a=document.getElementsByTagName("head")[0],r=document.createElement("script");r.type="text/javascript",r.innerHTML=t,a.appendChild(r),window.addEventListener("locationchange",g),g()},destroy:()=>{window.removeEventListener("blur",m),window.removeEventListener("locationchange",g),f()},commands:{Answer:{match:{en:function({preTs:a,normTs:r}){let n=r.toLowerCase(),e=p();console.log("[Bunpro.matchAnswer] t=%s,a=%o",n,e);for(var u=0;u<e.length;u++){let s=e[u];if(s===n||s===i(n))return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s",e[u],s,n),o=e[u],[0,n.length,[e[u]]]}o=""},ja:function({preTs:a,normTs:r}){let n=r.toLowerCase(),e=p();console.log("[Bunpro.matchAnswer] t=%s,a=%o",n,e);for(var u=0;u<e.length;u++){let s=e[u];if(s===n||s===i(n))return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s",e[u],s,n),o=e[u],[0,n.length,[e[u]]]}o=""}},pageFn:function({preTs:a,normTs:r}){let n=r;if(o.length<1){console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",o,n);return}let e=document.getElementById("study-answer-input");e!==null?(e.value=o,w()):console.log("[Bunpro.inputAnswer] studyAreaInput was null")}},Hint:{pageFn:function(){c("#show-english-hint")}},Next:{pageFn:function(){c("#submit-study-answer")}},Wrong:{pageFn:function(){o="あああ",h({preTs:"",normTs:o})}},Info:{pageFn:function(){c("#show-grammar")}}}}})();
+LS-SPLITallPlugins.Bunpro=(()=>{var r="",a,g=/^https?:\/\/(www\.)?bunpro\.jp\/(learn|study|cram)/,h={もう:"も",わ:"は"};function c(){setTimeout(p,200)}function d(n){let e=h[n];return e===null?n:e}function w(n){return n!=null}function f(){return Array.from(document.querySelectorAll("#answer_in_kana")).map(n=>n.getAttribute("data-answer")).filter(w)}function B({preTs:n,normTs:e}){let t=e.toLowerCase(),u=f();console.log("[Bunpro.matchAnswer] t=%s,a=%o",t,u);for(var o=0;o<u.length;o++){let l=u[o];if(l===t||l===d(t))return console.log("[Bunpro.matchAnswer] a=%s h=%s t=%s",u[o],l,t),r=u[o],[0,t.length,[u[o]]]}r=""}function v({preTs:n,normTs:e}){let t=e;if(r.length<1){console.log("[Bunpro.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",r,t);return}let u=document.getElementById("study-answer-input");u!==null?(u.value=r,y()):console.log("[Bunpro.inputAnswer] studyAreaInput was null")}function E(){r="あああ",v({preTs:"",normTs:r})}function s(n){let e=document.querySelector(n);e!==null?e.click():console.log("[Bunpro.clickElement] %s was null",n)}function y(){s("#submit-study-answer")}function A(){s("#show-english-hint")}function C(){s("#show-grammar")}function p(){console.log("[Bunpro.enterBunproContext]"),a=PluginBase.util.getLanguage(),PluginBase.util.enterContext(["Bunpro"]),PluginBase.util.setLanguage("ja")}function m(){console.log("[Bunpro.exitBunproContext]"),PluginBase.util.enterContext(["Normal"]),a!==null&&PluginBase.util.setLanguage(a)}function i(){console.log("[Bunpro.locationChangeHandler] href=%s",document.location.href),document.location.href.match(g)?p():m()}return{...PluginBase,init:()=>{window.addEventListener("blur",c,!0),a=PluginBase.util.getLanguage();let n=`history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -253,10 +27,4 @@ allPlugins.Bunpro = (() => {
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;
-    var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
-    script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
-  }, destroy: () => {
-    window.removeEventListener("locationchange", locationChangeHandler), exitBunproContext();
-  }, commands: {} };
-})();
+        })(history.replaceState);`;var e=document.getElementsByTagName("head")[0],t=document.createElement("script");t.type="text/javascript",t.innerHTML=n,e.appendChild(t),window.addEventListener("locationchange",i),i()},destroy:()=>{window.removeEventListener("blur",c),window.removeEventListener("locationchange",i),m()},commands:{}}})();
