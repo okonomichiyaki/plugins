@@ -92,6 +92,14 @@ export function markWrong() {
     }
 }
 
+export function markCorrect() {
+    let answers = getAnswers();
+    if (answers.length > 0) {
+        matchedAnswer = answers[0];
+        matchAnswer({preTs: "", normTs: answers[0]});
+    }
+}
+
 function compareAnswer(answer: string, transcript: string) {
     if (answer===transcript) {
         return true;
@@ -276,7 +284,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     description: "",
     match: /^https:\/\/kitsun\.io\/.*$/,
     apiVersion: 2,
-    version: "0.0.4",
+    version: "0.0.4xxx",
     init: () => {
         currentState = FlashCardState.Flipping;
         previousLanguage = PluginBase.util.getLanguage();
@@ -310,6 +318,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
                 "LipSurf.Turn off LipSurf",
                 "Answer",
                 "Next",
+                "Correct",
                 "Wrong"
             ]
         }
@@ -342,6 +351,13 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
             context: "Kitsun Review",
             normal: false,
             pageFn: markWrong
+        }, {
+            name: "Correct",
+            description: "Mark a card correct",
+            match: "correct",
+            context: "Kitsun Review",
+            normal: false,
+            pageFn: markCorrect
         }
 ]
 }};

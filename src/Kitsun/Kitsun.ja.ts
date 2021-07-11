@@ -20,6 +20,10 @@ Kitsun.languages!.ja = {
         "Wrong": {
             name: "バツ (wrong)",
             match: ["だめ", "ばつ"],
+        },
+        "Correct": {
+            name: "正しい (correct)",
+            match: ["ただしい"],
         }
     }
 };
