@@ -1,67 +1,4 @@
-import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';// dist/tmp/KaniWani/KaniWani.js
-var kaniwaniDotCom = /^https:\/\/kaniwani.com\/.*$/, activePages = /^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/, previousLanguage;
-function katakanaToHiragana(s) {
-  let lower = "゠".codePointAt(0), upper = "ヿ".codePointAt(0), diff = "ア".codePointAt(0) - "あ".codePointAt(0);
-  return s.split("").map((c) => {
-    let point = c.codePointAt(0);
-    return point >= lower && point <= upper ? String.fromCodePoint(point - diff) : c;
-  }).join("");
-}
-function getAnswers() {
-  let hidden = document.querySelectorAll("div[data-ruby]");
-  if (hidden === null || hidden.length === 0)
-    return console.log("[KaniWani.getAnswer] failed to find hidden div"), [];
-  let answer = hidden[0].getAttribute("data-ruby");
-  if (answer === null)
-    return console.log("[KaniWani.getAnswer] found hidden div, but no data ruby"), [];
-  let parts = answer.split(" ");
-  return [{ answer: parts[0], kana: parts[1] }];
-}
-var matchedAnswer = "";
-function markWrong() {
-  console.log("[KaniWani.markWrong]");
-  let answer = document.getElementById("answer");
-  answer !== null && (answer.value = "あああ", clickNext()), window.setTimeout(() => {
-    let info = document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");
-    console.log("info=%o", info), info.length > 0 && (console.log("clicked info=%o", info), info[0].click());
-  }, 100);
-}
-function matchAnswer({ preTs, normTs }) {
-  let answers = getAnswers(), transcript = normTs.toLowerCase();
-  console.log("[KaniWani.matchAnswer] t=%s,a=%o", transcript, answers);
-  for (var i = 0; i < answers.length; i++) {
-    let answer = katakanaToHiragana(answers[i].kana);
-    if (answer === transcript)
-      return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i].answer, [0, transcript.length, [answers[i].kana]];
-  }
-  matchedAnswer = "";
-}
-function clickNext() {
-  console.log("[KaniWani.clickNext]");
-  let nextButtons = document.querySelectorAll('button[title="Submit answer"]');
-  nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[KaniWani.clickNext] failed to find next button");
-}
-function inputAnswer({ preTs, normTs }) {
-  let transcript = normTs;
-  if (matchedAnswer.length < 1) {
-    console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-    return;
-  }
-  let answer = document.getElementById("answer");
-  answer !== null ? (answer.value = matchedAnswer, clickNext()) : console.log("[KaniWani.inputAnswer] answer was null");
-}
-function exitKaniWaniContext() {
-  console.log("[KaniWani.exitKaniWaniContext]"), PluginBase.util.enterContext(["Normal"]), PluginBase.util.setLanguage(previousLanguage);
-}
-function enterKaniWaniContext() {
-  console.log("[KaniWani.enterKaniWaniContext]"), PluginBase.util.enterContext(["KaniWani Review"]), previousLanguage = PluginBase.util.getLanguage(), PluginBase.util.setLanguage("ja");
-}
-function locationChangeHandler() {
-  document.location.href.match(activePages) ? enterKaniWaniContext() : PluginBase.util.getContext().includes("KaniWani Review") && exitKaniWaniContext();
-}
-var KaniWani_default = { ...PluginBase, languages: {}, niceName: "KaniWani", description: "", match: kaniwaniDotCom, version: "0.0.2", apiVersion: 2, init: () => {
-  previousLanguage = PluginBase.util.getLanguage();
-  let src = `history.pushState = ( f => function pushState(){
+import PluginBase from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/plugin-base.js';import ExtensionUtil from 'chrome-extension://lnnmjmalakahagblkkcnjkoaihlfglon/dist/modules/extension-util.js';var m=/^https:\/\/kaniwani.com\/.*$/,w=/^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/,s;function p(e){let t="゠".codePointAt(0),n="ヿ".codePointAt(0),a="ア".codePointAt(0)-"あ".codePointAt(0);return e.split("").map(i=>{let o=i.codePointAt(0);return o>=t&&o<=n?String.fromCodePoint(o-a):i}).join("")}function f(){let e=document.querySelectorAll("div[data-ruby]");if(e===null||e.length===0)return console.log("[KaniWani.getAnswer] failed to find hidden div"),[];let t=e[0].getAttribute("data-ruby");if(t===null)return console.log("[KaniWani.getAnswer] found hidden div, but no data ruby"),[];let n=t.split(" ");return[{answer:n[0],kana:n[1]}]}var r="";function h(){console.log("[KaniWani.markWrong]");let e=document.getElementById("answer");e!==null&&(e.value="あああ",u()),window.setTimeout(()=>{let t=document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");console.log("info=%o",t),t.length>0&&(console.log("clicked info=%o",t),t[0].click())},100)}function c({preTs:e,normTs:t}){let n=f(),a=t.toLowerCase();console.log("[KaniWani.matchAnswer] t=%s,a=%o",a,n);for(var i=0;i<n.length;i++){let o=p(n[i].kana);if(o===a)return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s",n[i],o,a),r=n[i].answer,[0,a.length,[n[i].kana]]}r=""}function u(){console.log("[KaniWani.clickNext]");let e=document.querySelectorAll('button[title="Submit answer"]');e.length>0?e.item(0).click():console.log("[KaniWani.clickNext] failed to find next button")}function v({preTs:e,normTs:t}){let n=t;if(r.length<1){console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",r,n);return}let a=document.getElementById("answer");a!==null?(a.value=r,u()):console.log("[KaniWani.inputAnswer] answer was null")}function g(){console.log("[KaniWani.exitKaniWaniContext]"),PluginBase.util.enterContext(["Normal"]),PluginBase.util.setLanguage(s)}function W(){console.log("[KaniWani.enterKaniWaniContext]"),PluginBase.util.enterContext(["KaniWani Review"]),s=PluginBase.util.getLanguage(),PluginBase.util.setLanguage("ja")}function l(){document.location.href.match(w)?W():PluginBase.util.getContext().includes("KaniWani Review")&&g()}var d={...PluginBase,languages:{},niceName:"KaniWani",description:"",match:m,version:"0.0.2",apiVersion:2,init:()=>{s=PluginBase.util.getLanguage();let e=`history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -70,82 +7,8 @@ var KaniWani_default = { ...PluginBase, languages: {}, niceName: "KaniWani", des
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;
-  var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
-  script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
-}, destroy: () => {
-  window.removeEventListener("locationchange", locationChangeHandler), exitKaniWaniContext();
-}, contexts: { "KaniWani Review": { commands: ["LipSurf.Change Language to Japanese", "LipSurf.Normal Mode", "LipSurf.Turn off LipSurf", "Answer", "Next", "Wrong"] } }, commands: [{ name: "Answer", description: "Submit an English answer for a KaniWani review", match: { description: "[English answer]", fn: matchAnswer }, context: "KaniWani Review", normal: !1, pageFn: inputAnswer }, { name: "Next", description: "Go to the next item in a KaniWani review", match: "next", context: "KaniWani Review", normal: !1, pageFn: clickNext }, { name: "Wrong", description: "Mark a card wrong", match: "wrong", context: "KaniWani Review", normal: !1, pageFn: markWrong }] };
-KaniWani_default.languages.ja = { niceName: "KaniWani", description: "KaniWani", commands: { Answer: { name: "答え (answer)", match: { description: "[KaniWaniの答え]", fn: matchAnswer } }, Next: { name: "次へ (next)", match: ["つぎ", "ねくすと", "ていしゅつ", "すすむ", "ちぇっく"] }, Wrong: { name: "バツ (wrong)", match: ["だめ", "ばつ"] } } };
-var dumby_default = KaniWani_default;
-export {
-  dumby_default as default
-};
-LS-SPLIT// dist/tmp/KaniWani/KaniWani.js
-allPlugins.KaniWani = (() => {
-  var kaniwaniDotCom = /^https:\/\/kaniwani.com\/.*$/, activePages = /^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/, previousLanguage;
-  function katakanaToHiragana(s) {
-    let lower = "゠".codePointAt(0), upper = "ヿ".codePointAt(0), diff = "ア".codePointAt(0) - "あ".codePointAt(0);
-    return s.split("").map((c) => {
-      let point = c.codePointAt(0);
-      return point >= lower && point <= upper ? String.fromCodePoint(point - diff) : c;
-    }).join("");
-  }
-  function getAnswers() {
-    let hidden = document.querySelectorAll("div[data-ruby]");
-    if (hidden === null || hidden.length === 0)
-      return console.log("[KaniWani.getAnswer] failed to find hidden div"), [];
-    let answer = hidden[0].getAttribute("data-ruby");
-    if (answer === null)
-      return console.log("[KaniWani.getAnswer] found hidden div, but no data ruby"), [];
-    let parts = answer.split(" ");
-    return [{ answer: parts[0], kana: parts[1] }];
-  }
-  var matchedAnswer = "";
-  function markWrong() {
-    console.log("[KaniWani.markWrong]");
-    let answer = document.getElementById("answer");
-    answer !== null && (answer.value = "あああ", clickNext()), window.setTimeout(() => {
-      let info = document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");
-      console.log("info=%o", info), info.length > 0 && (console.log("clicked info=%o", info), info[0].click());
-    }, 100);
-  }
-  function matchAnswer({ preTs, normTs }) {
-    let answers = getAnswers(), transcript = normTs.toLowerCase();
-    console.log("[KaniWani.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let answer = katakanaToHiragana(answers[i].kana);
-      if (answer === transcript)
-        return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i].answer, [0, transcript.length, [answers[i].kana]];
-    }
-    matchedAnswer = "";
-  }
-  function clickNext() {
-    console.log("[KaniWani.clickNext]");
-    let nextButtons = document.querySelectorAll('button[title="Submit answer"]');
-    nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[KaniWani.clickNext] failed to find next button");
-  }
-  function inputAnswer({ preTs, normTs }) {
-    let transcript = normTs;
-    if (matchedAnswer.length < 1) {
-      console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-      return;
-    }
-    let answer = document.getElementById("answer");
-    answer !== null ? (answer.value = matchedAnswer, clickNext()) : console.log("[KaniWani.inputAnswer] answer was null");
-  }
-  function exitKaniWaniContext() {
-    console.log("[KaniWani.exitKaniWaniContext]"), PluginBase.util.enterContext(["Normal"]), PluginBase.util.setLanguage(previousLanguage);
-  }
-  function enterKaniWaniContext() {
-    console.log("[KaniWani.enterKaniWaniContext]"), PluginBase.util.enterContext(["KaniWani Review"]), previousLanguage = PluginBase.util.getLanguage(), PluginBase.util.setLanguage("ja");
-  }
-  function locationChangeHandler() {
-    document.location.href.match(activePages) ? enterKaniWaniContext() : PluginBase.util.getContext().includes("KaniWani Review") && exitKaniWaniContext();
-  }
-  return { ...PluginBase, init: () => {
-    previousLanguage = PluginBase.util.getLanguage();
-    let src = `history.pushState = ( f => function pushState(){
+        })(history.replaceState);`;var t=document.getElementsByTagName("head")[0],n=document.createElement("script");n.type="text/javascript",n.innerHTML=e,t.appendChild(n),window.addEventListener("locationchange",l),l()},destroy:()=>{window.removeEventListener("locationchange",l),g()},contexts:{"KaniWani Review":{commands:["LipSurf.Change Language to Japanese","LipSurf.Normal Mode","LipSurf.Turn off LipSurf","Answer","Next","Wrong"]}},commands:[{name:"Answer",description:"Submit an English answer for a KaniWani review",match:{description:"[English answer]",fn:c},context:"KaniWani Review",normal:!1,pageFn:v},{name:"Next",description:"Go to the next item in a KaniWani review",match:"next",context:"KaniWani Review",normal:!1,pageFn:u},{name:"Wrong",description:"Mark a card wrong",match:"wrong",context:"KaniWani Review",normal:!1,pageFn:h}]};d.languages.ja={niceName:"KaniWani",description:"KaniWani",commands:{Answer:{name:"答え (answer)",match:{description:"[KaniWaniの答え]",fn:c}},Next:{name:"次へ (next)",match:["つぎ","ねくすと","ていしゅつ","すすむ","ちぇっく"]},Wrong:{name:"バツ (wrong)",match:["だめ","ばつ"]}}};var K=d;export{K as default};
+LS-SPLITallPlugins.KaniWani=(()=>{var p=/^https:\/\/kaniwani.com\/.*$/,m=/^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/,c;function u(i){let t="゠".codePointAt(0),n="ヿ".codePointAt(0),e="ア".codePointAt(0)-"あ".codePointAt(0);return i.split("").map(a=>{let o=a.codePointAt(0);return o>=t&&o<=n?String.fromCodePoint(o-e):a}).join("")}function g(){let i=document.querySelectorAll("div[data-ruby]");if(i===null||i.length===0)return console.log("[KaniWani.getAnswer] failed to find hidden div"),[];let t=i[0].getAttribute("data-ruby");if(t===null)return console.log("[KaniWani.getAnswer] found hidden div, but no data ruby"),[];let n=t.split(" ");return[{answer:n[0],kana:n[1]}]}var s="";function v(){console.log("[KaniWani.markWrong]");let i=document.getElementById("answer");i!==null&&(i.value="あああ",l()),window.setTimeout(()=>{let t=document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");console.log("info=%o",t),t.length>0&&(console.log("clicked info=%o",t),t[0].click())},100)}function h({preTs:i,normTs:t}){let n=g(),e=t.toLowerCase();console.log("[KaniWani.matchAnswer] t=%s,a=%o",e,n);for(var a=0;a<n.length;a++){let o=u(n[a].kana);if(o===e)return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s",n[a],o,e),s=n[a].answer,[0,e.length,[n[a].kana]]}s=""}function l(){console.log("[KaniWani.clickNext]");let i=document.querySelectorAll('button[title="Submit answer"]');i.length>0?i.item(0).click():console.log("[KaniWani.clickNext] failed to find next button")}function W({preTs:i,normTs:t}){let n=t;if(s.length<1){console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",s,n);return}let e=document.getElementById("answer");e!==null?(e.value=s,l()):console.log("[KaniWani.inputAnswer] answer was null")}function w(){console.log("[KaniWani.exitKaniWaniContext]"),PluginBase.util.enterContext(["Normal"]),PluginBase.util.setLanguage(c)}function f(){console.log("[KaniWani.enterKaniWaniContext]"),PluginBase.util.enterContext(["KaniWani Review"]),c=PluginBase.util.getLanguage(),PluginBase.util.setLanguage("ja")}function d(){document.location.href.match(m)?f():PluginBase.util.getContext().includes("KaniWani Review")&&w()}return{...PluginBase,init:()=>{c=PluginBase.util.getLanguage();let i=`history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -154,115 +17,8 @@ allPlugins.KaniWani = (() => {
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;
-    var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
-    script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
-  }, destroy: () => {
-    window.removeEventListener("locationchange", locationChangeHandler), exitKaniWaniContext();
-  }, commands: { Answer: { match: { en: function({ preTs, normTs }) {
-    let answers = getAnswers(), transcript = normTs.toLowerCase();
-    console.log("[KaniWani.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let answer = katakanaToHiragana(answers[i].kana);
-      if (answer === transcript)
-        return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i].answer, [0, transcript.length, [answers[i].kana]];
-    }
-    matchedAnswer = "";
-  }, ja: function({ preTs, normTs }) {
-    let answers = getAnswers(), transcript = normTs.toLowerCase();
-    console.log("[KaniWani.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let answer = katakanaToHiragana(answers[i].kana);
-      if (answer === transcript)
-        return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i].answer, [0, transcript.length, [answers[i].kana]];
-    }
-    matchedAnswer = "";
-  } }, pageFn: function({ preTs, normTs }) {
-    let transcript = normTs;
-    if (matchedAnswer.length < 1) {
-      console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-      return;
-    }
-    let answer = document.getElementById("answer");
-    answer !== null ? (answer.value = matchedAnswer, clickNext()) : console.log("[KaniWani.inputAnswer] answer was null");
-  } }, Next: { pageFn: function() {
-    console.log("[KaniWani.clickNext]");
-    let nextButtons = document.querySelectorAll('button[title="Submit answer"]');
-    nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[KaniWani.clickNext] failed to find next button");
-  } }, Wrong: { pageFn: function() {
-    console.log("[KaniWani.markWrong]");
-    let answer = document.getElementById("answer");
-    answer !== null && (answer.value = "あああ", clickNext()), window.setTimeout(() => {
-      let info = document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");
-      console.log("info=%o", info), info.length > 0 && (console.log("clicked info=%o", info), info[0].click());
-    }, 100);
-  } } } };
-})();
-LS-SPLIT// dist/tmp/KaniWani/KaniWani.js
-allPlugins.KaniWani = (() => {
-  var kaniwaniDotCom = /^https:\/\/kaniwani.com\/.*$/, activePages = /^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/, previousLanguage;
-  function katakanaToHiragana(s) {
-    let lower = "゠".codePointAt(0), upper = "ヿ".codePointAt(0), diff = "ア".codePointAt(0) - "あ".codePointAt(0);
-    return s.split("").map((c) => {
-      let point = c.codePointAt(0);
-      return point >= lower && point <= upper ? String.fromCodePoint(point - diff) : c;
-    }).join("");
-  }
-  function getAnswers() {
-    let hidden = document.querySelectorAll("div[data-ruby]");
-    if (hidden === null || hidden.length === 0)
-      return console.log("[KaniWani.getAnswer] failed to find hidden div"), [];
-    let answer = hidden[0].getAttribute("data-ruby");
-    if (answer === null)
-      return console.log("[KaniWani.getAnswer] found hidden div, but no data ruby"), [];
-    let parts = answer.split(" ");
-    return [{ answer: parts[0], kana: parts[1] }];
-  }
-  var matchedAnswer = "";
-  function markWrong() {
-    console.log("[KaniWani.markWrong]");
-    let answer = document.getElementById("answer");
-    answer !== null && (answer.value = "あああ", clickNext()), window.setTimeout(() => {
-      let info = document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");
-      console.log("info=%o", info), info.length > 0 && (console.log("clicked info=%o", info), info[0].click());
-    }, 100);
-  }
-  function matchAnswer({ preTs, normTs }) {
-    let answers = getAnswers(), transcript = normTs.toLowerCase();
-    console.log("[KaniWani.matchAnswer] t=%s,a=%o", transcript, answers);
-    for (var i = 0; i < answers.length; i++) {
-      let answer = katakanaToHiragana(answers[i].kana);
-      if (answer === transcript)
-        return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s", answers[i], answer, transcript), matchedAnswer = answers[i].answer, [0, transcript.length, [answers[i].kana]];
-    }
-    matchedAnswer = "";
-  }
-  function clickNext() {
-    console.log("[KaniWani.clickNext]");
-    let nextButtons = document.querySelectorAll('button[title="Submit answer"]');
-    nextButtons.length > 0 ? nextButtons.item(0).click() : console.log("[KaniWani.clickNext] failed to find next button");
-  }
-  function inputAnswer({ preTs, normTs }) {
-    let transcript = normTs;
-    if (matchedAnswer.length < 1) {
-      console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s", matchedAnswer, transcript);
-      return;
-    }
-    let answer = document.getElementById("answer");
-    answer !== null ? (answer.value = matchedAnswer, clickNext()) : console.log("[KaniWani.inputAnswer] answer was null");
-  }
-  function exitKaniWaniContext() {
-    console.log("[KaniWani.exitKaniWaniContext]"), PluginBase.util.enterContext(["Normal"]), PluginBase.util.setLanguage(previousLanguage);
-  }
-  function enterKaniWaniContext() {
-    console.log("[KaniWani.enterKaniWaniContext]"), PluginBase.util.enterContext(["KaniWani Review"]), previousLanguage = PluginBase.util.getLanguage(), PluginBase.util.setLanguage("ja");
-  }
-  function locationChangeHandler() {
-    document.location.href.match(activePages) ? enterKaniWaniContext() : PluginBase.util.getContext().includes("KaniWani Review") && exitKaniWaniContext();
-  }
-  return { ...PluginBase, init: () => {
-    previousLanguage = PluginBase.util.getLanguage();
-    let src = `history.pushState = ( f => function pushState(){
+        })(history.replaceState);`;var t=document.getElementsByTagName("head")[0],n=document.createElement("script");n.type="text/javascript",n.innerHTML=i,t.appendChild(n),window.addEventListener("locationchange",d),d()},destroy:()=>{window.removeEventListener("locationchange",d),w()},commands:{Answer:{match:{en:function({preTs:t,normTs:n}){let e=g(),a=n.toLowerCase();console.log("[KaniWani.matchAnswer] t=%s,a=%o",a,e);for(var o=0;o<e.length;o++){let r=u(e[o].kana);if(r===a)return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s",e[o],r,a),s=e[o].answer,[0,a.length,[e[o].kana]]}s=""},ja:function({preTs:t,normTs:n}){let e=g(),a=n.toLowerCase();console.log("[KaniWani.matchAnswer] t=%s,a=%o",a,e);for(var o=0;o<e.length;o++){let r=u(e[o].kana);if(r===a)return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s",e[o],r,a),s=e[o].answer,[0,a.length,[e[o].kana]]}s=""}},pageFn:function({preTs:t,normTs:n}){let e=n;if(s.length<1){console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",s,e);return}let a=document.getElementById("answer");a!==null?(a.value=s,l()):console.log("[KaniWani.inputAnswer] answer was null")}},Next:{pageFn:function(){console.log("[KaniWani.clickNext]");let t=document.querySelectorAll('button[title="Submit answer"]');t.length>0?t.item(0).click():console.log("[KaniWani.clickNext] failed to find next button")}},Wrong:{pageFn:function(){console.log("[KaniWani.markWrong]");let t=document.getElementById("answer");t!==null&&(t.value="あああ",l()),window.setTimeout(()=>{let n=document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");console.log("info=%o",n),n.length>0&&(console.log("clicked info=%o",n),n[0].click())},100)}}}}})();
+LS-SPLITallPlugins.KaniWani=(()=>{var f=/^https:\/\/kaniwani.com\/.*$/,d=/^https:\/\/kaniwani.com\/(lessons|reviews)\/session$/,r;function g(e){let t="゠".codePointAt(0),n="ヿ".codePointAt(0),a="ア".codePointAt(0)-"あ".codePointAt(0);return e.split("").map(i=>{let o=i.codePointAt(0);return o>=t&&o<=n?String.fromCodePoint(o-a):i}).join("")}function m(){let e=document.querySelectorAll("div[data-ruby]");if(e===null||e.length===0)return console.log("[KaniWani.getAnswer] failed to find hidden div"),[];let t=e[0].getAttribute("data-ruby");if(t===null)return console.log("[KaniWani.getAnswer] found hidden div, but no data ruby"),[];let n=t.split(" ");return[{answer:n[0],kana:n[1]}]}var u="";function p(){console.log("[KaniWani.markWrong]");let e=document.getElementById("answer");e!==null&&(e.value="あああ",l()),window.setTimeout(()=>{let t=document.querySelectorAll("#app > div > main > div > div > div > section.sc-1y6l0g0-1.cvbtyw > div.rsmiak-0.fjUYuW > button:nth-child(2)");console.log("info=%o",t),t.length>0&&(console.log("clicked info=%o",t),t[0].click())},100)}function w({preTs:e,normTs:t}){let n=m(),a=t.toLowerCase();console.log("[KaniWani.matchAnswer] t=%s,a=%o",a,n);for(var i=0;i<n.length;i++){let o=g(n[i].kana);if(o===a)return console.log("[KaniWani.matchAnswer] a=%o h=%s t=%s",n[i],o,a),u=n[i].answer,[0,a.length,[n[i].kana]]}u=""}function l(){console.log("[KaniWani.clickNext]");let e=document.querySelectorAll('button[title="Submit answer"]');e.length>0?e.item(0).click():console.log("[KaniWani.clickNext] failed to find next button")}function v({preTs:e,normTs:t}){let n=t;if(u.length<1){console.log("[KaniWani.inputAnswer] matched transcript but matchedAnswer=%s? transcript=%s",u,n);return}let a=document.getElementById("answer");a!==null?(a.value=u,l()):console.log("[KaniWani.inputAnswer] answer was null")}function c(){console.log("[KaniWani.exitKaniWaniContext]"),PluginBase.util.enterContext(["Normal"]),PluginBase.util.setLanguage(r)}function h(){console.log("[KaniWani.enterKaniWaniContext]"),PluginBase.util.enterContext(["KaniWani Review"]),r=PluginBase.util.getLanguage(),PluginBase.util.setLanguage("ja")}function s(){document.location.href.match(d)?h():PluginBase.util.getContext().includes("KaniWani Review")&&c()}return{...PluginBase,init:()=>{r=PluginBase.util.getLanguage();let e=`history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
@@ -271,10 +27,4 @@ allPlugins.KaniWani = (() => {
             var ret = f.apply(this, arguments);
             window.dispatchEvent(new Event('locationchange'));
             return ret;
-        })(history.replaceState);`;
-    var head = document.getElementsByTagName("head")[0], script = document.createElement("script");
-    script.type = "text/javascript", script.innerHTML = src, head.appendChild(script), window.addEventListener("locationchange", locationChangeHandler), locationChangeHandler();
-  }, destroy: () => {
-    window.removeEventListener("locationchange", locationChangeHandler), exitKaniWaniContext();
-  }, commands: {} };
-})();
+        })(history.replaceState);`;var t=document.getElementsByTagName("head")[0],n=document.createElement("script");n.type="text/javascript",n.innerHTML=e,t.appendChild(n),window.addEventListener("locationchange",s),s()},destroy:()=>{window.removeEventListener("locationchange",s),c()},commands:{}}})();
