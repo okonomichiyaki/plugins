@@ -16,6 +16,10 @@ const particles: { [key: string]: string } = {
     "わ":"は",
 }
 
+function activeElChange() {
+	setTimeout(enterBunproContext, 200);
+}
+
 function fuzzyParticle(transcript: string): string {
     const maybe = particles[transcript]
     if (maybe === null) {
@@ -132,6 +136,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     apiVersion: 2,
     version: "0.0.4",
     init: () => {
+        window.addEventListener("blur", activeElChange, true);
         previousLanguage = PluginBase.util.getLanguage();
         const src = `history.pushState = ( f => function pushState(){
             var ret = f.apply(this, arguments);
@@ -152,6 +157,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
         locationChangeHandler();
     },
     destroy: () => {
+        window.removeEventListener("blur", activeElChange);
         window.removeEventListener('locationchange', locationChangeHandler);
         exitBunproContext();
     },
