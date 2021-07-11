@@ -284,7 +284,7 @@ export default <IPluginBase & IPlugin> {...PluginBase, ...{
     description: "",
     match: /^https:\/\/kitsun\.io\/.*$/,
     apiVersion: 2,
-    version: "0.0.4xxx",
+    version: "0.0.4",
     init: () => {
         currentState = FlashCardState.Flipping;
         previousLanguage = PluginBase.util.getLanguage();
